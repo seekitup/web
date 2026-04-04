@@ -5,6 +5,7 @@ const es: Translations = {
     seekitup: "SeekItUp",
     link_one: "{{count}} link",
     link_other: "{{count}} links",
+    comingSoon: "Próximamente",
   },
 
   downloadPage: {

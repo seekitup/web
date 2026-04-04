@@ -18,6 +18,8 @@ export function NotFoundPage() {
         description={t('notFoundPage.description')}
         ctaText={t('notFoundPage.cta')}
         ctaTo="/download"
+        ctaDisabled
+        ctaLabel={t('common.comingSoon')}
       />
     </>
   );

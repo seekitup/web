@@ -1,7 +1,4 @@
-import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { getStoreUrl } from '@/lib/platform';
 
 interface AppBannerProps {
   dismissed: boolean;
@@ -10,37 +7,6 @@ interface AppBannerProps {
 
 export function AppBanner({ dismissed, onDismiss: _onDismiss }: AppBannerProps) {
   const { t } = useTranslation();
-  const { username, slug } = useParams<{ username?: string; slug?: string }>();
-  const { pathname } = useLocation();
-  const isCollectionPage = !!username && !!slug && pathname === `/${username}/${slug}`;
-  const storeUrl = getStoreUrl();
-
-  const handleOpenInApp = useCallback(() => {
-    if (!isCollectionPage || !username || !slug) return;
-
-    const deepLink = `seekitup://collection/${username}/${slug}`;
-
-    // Try to open the app via custom scheme.
-    // If the app opens, the page gets backgrounded and the timeout won't fire.
-    // If the app doesn't open, redirect to the store after a delay.
-    const start = Date.now();
-    const timeout = setTimeout(() => {
-      if (Date.now() - start < 2000) {
-        window.location.href = storeUrl ?? '/download';
-      }
-    }, 1500);
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        clearTimeout(timeout);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    setTimeout(() => document.removeEventListener('visibilitychange', handleVisibility), 3000);
-
-    window.location.href = deepLink;
-  }, [isCollectionPage, username, slug, storeUrl]);
-
   if (dismissed) return null;
 
   return (
@@ -59,30 +25,11 @@ export function AppBanner({ dismissed, onDismiss: _onDismiss }: AppBannerProps) 
 
         {/* CTA + Close */}
         <div className="flex items-center gap-2 shrink-0">
-          {isCollectionPage ? (
-            <button
-              onClick={handleOpenInApp}
-              className="bg-primary text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary-dark transition-colors cursor-pointer"
-            >
-              {t('appBanner.openInApp')}
-            </button>
-          ) : storeUrl ? (
-            <a
-              href={storeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-primary text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary-dark transition-colors no-underline cursor-pointer"
-            >
-              {t('appBanner.getTheApp')}
-            </a>
-          ) : (
-            <Link
-              to="/download"
-              className="bg-primary text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary-dark transition-colors no-underline cursor-pointer"
-            >
-              {t('appBanner.getTheApp')}
-            </Link>
-          )}
+          <span
+            className="bg-primary/40 text-black/60 text-sm font-semibold px-4 py-2 rounded-full transition-colors no-underline cursor-not-allowed"
+          >
+            {t('common.comingSoon')}
+          </span>
           {/* <button
             onClick={onDismiss}
             className="text-white/50 hover:text-white transition-colors p-1"

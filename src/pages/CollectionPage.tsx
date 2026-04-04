@@ -116,6 +116,8 @@ export function CollectionPage() {
           description={t('collectionPage.errorDescription')}
           ctaText={t('collectionPage.errorCta')}
           ctaTo="/download"
+          ctaDisabled
+          ctaLabel={t('common.comingSoon')}
         />
       </>
     );

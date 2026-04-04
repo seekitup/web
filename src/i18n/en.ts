@@ -3,6 +3,7 @@ const en = {
     seekitup: "SeekItUp",
     link_one: "{{count}} link",
     link_other: "{{count}} links",
+    comingSoon: "Coming soon",
   },
 
   downloadPage: {
