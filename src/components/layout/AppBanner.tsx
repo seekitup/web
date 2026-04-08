@@ -5,9 +5,11 @@ import { getStoreUrl } from '@/lib/platform';
 
 interface AppBannerProps {
   dismissed: boolean;
+  onDismiss?: () => void;
 }
 
-export function AppBanner({ dismissed }: AppBannerProps) {
+export function AppBanner({ dismissed, onDismiss }: AppBannerProps) {
+  void onDismiss;
   const { t } = useTranslation();
   const { username, slug } = useParams<{ username?: string; slug?: string }>();
   const { pathname } = useLocation();
