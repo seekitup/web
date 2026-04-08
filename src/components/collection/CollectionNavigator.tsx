@@ -1,7 +1,7 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { NavigatorPill } from '@/components/collection/NavigatorPill';
-import type { NavigatorItem } from '@/components/collection/NavigatorPill';
+import { useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { NavigatorPill } from "@/components/collection/NavigatorPill";
+import type { NavigatorItem } from "@/components/collection/NavigatorPill";
 
 interface CollectionNavigatorProps {
   items: NavigatorItem[];
@@ -22,7 +22,7 @@ const pillVariants = {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: { type: 'spring' as const, stiffness: 500, damping: 30 },
+    transition: { type: "spring" as const, stiffness: 500, damping: 30 },
   },
 };
 
@@ -63,13 +63,11 @@ export function CollectionNavigator({
 
     // Calculate offset to center the active element
     const scrollLeft =
-      activeEl.offsetLeft -
-      containerRect.width / 2 +
-      activeRect.width / 2;
+      activeEl.offsetLeft - containerRect.width / 2 + activeRect.width / 2;
 
     container.scrollTo({
       left: scrollLeft,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   }, [activeItemId]);
 
@@ -93,9 +91,9 @@ export function CollectionNavigator({
           className="overflow-x-auto scrollbar-hide"
           style={{
             maskImage:
-              'linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)',
+              "linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)",
             WebkitMaskImage:
-              'linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)',
+              "linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)",
           }}
         >
           <motion.div

@@ -1,4 +1,4 @@
-import type { Translations } from "./en"
+import type { Translations } from "./en";
 
 const es: Translations = {
   common: {
@@ -34,8 +34,7 @@ const es: Translations = {
   notFoundPage: {
     metaTitle: "Página no encontrada | Seekitup",
     title: "Página no encontrada",
-    description:
-      "La página que estás buscando no existe o fue movida.",
+    description: "La página que estás buscando no existe o fue movida.",
     cta: "Descargá Seekitup",
   },
 
@@ -72,6 +71,6 @@ const es: Translations = {
     complete: "Completo",
     grid: "Grilla",
   },
-}
+};
 
-export default es
+export default es;

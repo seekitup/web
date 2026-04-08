@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { getGoogleFaviconUrl } from '@/lib/linkUtils';
+import { useState, useMemo } from "react";
+import { getGoogleFaviconUrl } from "@/lib/linkUtils";
 
 interface FaviconProps {
   src?: string;
@@ -8,11 +8,11 @@ interface FaviconProps {
   size?: number;
 }
 
-type FaviconState = 'primary' | 'google' | 'fallback';
+type FaviconState = "primary" | "google" | "fallback";
 
-export function Favicon({ src, domain, alt = '', size = 16 }: FaviconProps) {
+export function Favicon({ src, domain, alt = "", size = 16 }: FaviconProps) {
   const [state, setState] = useState<FaviconState>(
-    src ? 'primary' : domain ? 'google' : 'fallback',
+    src ? "primary" : domain ? "google" : "fallback",
   );
 
   const googleUrl = useMemo(
@@ -21,14 +21,14 @@ export function Favicon({ src, domain, alt = '', size = 16 }: FaviconProps) {
   );
 
   const handleError = () => {
-    if (state === 'primary' && googleUrl) {
-      setState('google');
+    if (state === "primary" && googleUrl) {
+      setState("google");
     } else {
-      setState('fallback');
+      setState("fallback");
     }
   };
 
-  if (state === 'fallback') {
+  if (state === "fallback") {
     return (
       <div
         className="bg-neutral-700 rounded flex items-center justify-center"
@@ -53,7 +53,7 @@ export function Favicon({ src, domain, alt = '', size = 16 }: FaviconProps) {
     );
   }
 
-  const currentSrc = state === 'primary' ? src : googleUrl;
+  const currentSrc = state === "primary" ? src : googleUrl;
 
   return (
     <img

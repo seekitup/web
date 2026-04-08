@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import type { LookupChildCollectionDto, LookupPreviewLinkDto } from '@/types/api';
-import { getPreviewImageUrl } from '@/lib/linkUtils';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import type {
+  LookupChildCollectionDto,
+  LookupPreviewLinkDto,
+} from "@/types/api";
+import { getPreviewImageUrl } from "@/lib/linkUtils";
 
 interface CompactSubcollectionProps {
   collection: LookupChildCollectionDto;
@@ -26,14 +29,16 @@ function ThumbnailCell({
     <div className="relative w-full h-full bg-surface-light overflow-hidden">
       {imageUrl ? (
         <>
-          {!loaded && <div className="absolute inset-0 animate-pulse bg-neutral-700" />}
+          {!loaded && (
+            <div className="absolute inset-0 animate-pulse bg-neutral-700" />
+          )}
           <img
             src={imageUrl}
             alt=""
             loading="lazy"
             onLoad={() => setLoaded(true)}
             className={`w-full h-full object-cover transition-opacity duration-300 ${
-              loaded ? 'opacity-100' : 'opacity-0'
+              loaded ? "opacity-100" : "opacity-0"
             }`}
           />
         </>
@@ -159,7 +164,7 @@ export function CompactSubcollection({
             </div>
           </div>
           <p className="text-neutral-500 text-xs mt-1 pl-8">
-            {t('common.link', { count: totalLinks })}
+            {t("common.link", { count: totalLinks })}
           </p>
         </div>
       </Link>

@@ -1,19 +1,19 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
 
-import en from './en';
-import type { Translations } from './en';
-import es from './es';
+import en from "./en";
+import type { Translations } from "./en";
+import es from "./es";
 
-const DEFAULT_LANGUAGE = 'es';
+const DEFAULT_LANGUAGE = "es";
 
 const resources = {
   en: { translation: en },
   es: { translation: es },
 };
 
-export const supportedLanguages = ['en', 'es'] as const;
+export const supportedLanguages = ["en", "es"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
 i18n
@@ -24,15 +24,15 @@ i18n
     fallbackLng: DEFAULT_LANGUAGE,
     supportedLngs: [...supportedLanguages],
     nsSeparator: false,
-    keySeparator: '.',
-    defaultNS: 'translation',
+    keySeparator: ".",
+    defaultNS: "translation",
     interpolation: {
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-      lookupLocalStorage: 'seekitup-language',
+      order: ["localStorage", "navigator"],
+      caches: ["localStorage"],
+      lookupLocalStorage: "seekitup-language",
     },
   });
 

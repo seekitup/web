@@ -1,14 +1,17 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { LookupChildCollectionDto, CollectionLookupResponseDto } from '@/types/api';
-import { ExpandedSubcollection } from '@/components/collection/ExpandedSubcollection';
-import { CompactSubcollection } from '@/components/collection/CompactSubcollection';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
+import type {
+  LookupChildCollectionDto,
+  CollectionLookupResponseDto,
+} from "@/types/api";
+import { ExpandedSubcollection } from "@/components/collection/ExpandedSubcollection";
+import { CompactSubcollection } from "@/components/collection/CompactSubcollection";
 
 interface ChildCollectionSectionProps {
   childCollections: LookupChildCollectionDto[];
   parentCollection: CollectionLookupResponseDto;
-  view: 'list' | 'grid';
+  view: "list" | "grid";
 }
 
 export function ChildCollectionSection({
@@ -39,12 +42,12 @@ export function ChildCollectionSection({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-neutral-500 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+          className={`text-neutral-500 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
         >
           <polyline points="9 18 15 12 9 6" />
         </svg>
         <span className="text-neutral-400 text-sm font-medium">
-          {t('childCollections.title')}
+          {t("childCollections.title")}
         </span>
         <span className="text-neutral-600 text-xs">
           ({childCollections.length})
@@ -56,12 +59,12 @@ export function ChildCollectionSection({
         {expanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            {view === 'list' ? (
+            {view === "list" ? (
               /* Expanded view: each subcollection as a horizontal scroll section */
               <div className="pt-1">
                 {childCollections.map((child, i) => (

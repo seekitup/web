@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from "react";
 
 interface VideoPlayerProps {
   src: string;
@@ -8,7 +8,13 @@ interface VideoPlayerProps {
   maxHeight?: string;
 }
 
-export function VideoPlayer({ src, poster, isVisible, aspectRatio = '16 / 9', maxHeight = '400px' }: VideoPlayerProps) {
+export function VideoPlayer({
+  src,
+  poster,
+  isVisible,
+  aspectRatio = "16 / 9",
+  maxHeight = "400px",
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {

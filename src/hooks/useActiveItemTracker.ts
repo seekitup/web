@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
  * Tracks which item (child collection or link) is most visible in the viewport.
@@ -87,14 +87,14 @@ export function useActiveItemTracker(itemIds: string[]) {
       {
         threshold: [0, 0.15, 0.25, 0.5, 0.75, 1.0],
         // Account for sticky navbar (h-14 = 56px) + navigator (~68px)
-        rootMargin: '-124px 0px 0px 0px',
+        rootMargin: "-124px 0px 0px 0px",
       },
     );
 
     observerRef.current = observer;
 
     // Observe all elements with data-item-id
-    const elements = document.querySelectorAll<HTMLElement>('[data-item-id]');
+    const elements = document.querySelectorAll<HTMLElement>("[data-item-id]");
     elements.forEach((el) => observer.observe(el));
 
     return () => {
@@ -112,7 +112,7 @@ export function useActiveItemTracker(itemIds: string[]) {
     if (!observer) return;
 
     // Re-query and observe any new elements
-    const elements = document.querySelectorAll<HTMLElement>('[data-item-id]');
+    const elements = document.querySelectorAll<HTMLElement>("[data-item-id]");
     elements.forEach((el) => observer.observe(el));
   }, [itemIds]);
 
@@ -123,13 +123,13 @@ export function useActiveItemTracker(itemIds: string[]) {
         rafRef.current = requestAnimationFrame(flush);
       }
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [flush]);
 
   // Derive visibleLinkId for backward compat
-  const visibleLinkId = activeItemId?.startsWith('link-')
-    ? parseInt(activeItemId.replace('link-', ''), 10)
+  const visibleLinkId = activeItemId?.startsWith("link-")
+    ? parseInt(activeItemId.replace("link-", ""), 10)
     : null;
 
   // Keep the old handleVisibilityChange interface working for LinkCard

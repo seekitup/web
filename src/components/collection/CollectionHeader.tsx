@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
-import type { CollectionLookupResponseDto } from '@/types/api';
+import type { CollectionLookupResponseDto } from "@/types/api";
 
 interface CollectionHeaderProps {
   collection: CollectionLookupResponseDto;
@@ -46,9 +46,12 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
             </div>
           )}
           <div className="flex flex-col">
-            {[user.firstName, user.lastName].filter(Boolean).join(' ').trim() && (
+            {[user.firstName, user.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() && (
               <span className="text-white text-sm font-semibold leading-tight">
-                {[user.firstName, user.lastName].filter(Boolean).join(' ')}
+                {[user.firstName, user.lastName].filter(Boolean).join(" ")}
               </span>
             )}
             <span className="text-neutral-500 text-xs font-medium leading-tight">

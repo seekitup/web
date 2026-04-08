@@ -32,8 +32,7 @@ const en = {
   notFoundPage: {
     metaTitle: "Page not found | Seekitup",
     title: "Page not found",
-    description:
-      "The page you're looking for doesn't exist or has been moved.",
+    description: "The page you're looking for doesn't exist or has been moved.",
     cta: "Download Seekitup",
   },
 
@@ -70,7 +69,7 @@ const en = {
     complete: "Complete",
     grid: "Grid",
   },
-}
+};
 
-export default en
-export type Translations = typeof en
+export default en;
+export type Translations = typeof en;

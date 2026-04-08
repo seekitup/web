@@ -1,7 +1,11 @@
-import { useState } from 'react';
-import type { LinkResponseDto } from '@/types/api';
-import { Favicon } from '@/components/ui/Favicon';
-import { getLinkFavicon, getLinkedInProfilePicture, getLinkedInCoverImage } from '@/lib/linkUtils';
+import { useState } from "react";
+import type { LinkResponseDto } from "@/types/api";
+import { Favicon } from "@/components/ui/Favicon";
+import {
+  getLinkFavicon,
+  getLinkedInProfilePicture,
+  getLinkedInCoverImage,
+} from "@/lib/linkUtils";
 
 interface LinkedInHeroCardProps {
   link: LinkResponseDto;
@@ -15,13 +19,13 @@ export function LinkedInHeroCard({ link }: LinkedInHeroCardProps) {
   const coverImage = getLinkedInCoverImage(link);
   const favicon = getLinkFavicon(link);
 
-  const name = link.platformUserName || link.title || link.ogTitle || '';
-  const headline = link.platformPostTitle || '';
+  const name = link.platformUserName || link.title || link.ogTitle || "";
+  const headline = link.platformPostTitle || "";
 
   // Show clean URL like "linkedin.com/in/username"
   const displayUrl = link.url
-    ? link.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
-    : link.domain || '';
+    ? link.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "")
+    : link.domain || "";
 
   return (
     <div className="bg-white overflow-hidden rounded-xl flex flex-col">
@@ -38,14 +42,14 @@ export function LinkedInHeroCard({ link }: LinkedInHeroCardProps) {
               loading="lazy"
               onLoad={() => setCoverLoaded(true)}
               className={`w-full h-full object-cover transition-opacity duration-300 ${
-                coverLoaded ? 'opacity-100' : 'opacity-0'
+                coverLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
           </>
         ) : (
           <div
             className="w-full h-full"
-            style={{ background: 'linear-gradient(135deg, #0077B5, #004182)' }}
+            style={{ background: "linear-gradient(135deg, #0077B5, #004182)" }}
           />
         )}
       </div>
@@ -65,16 +69,25 @@ export function LinkedInHeroCard({ link }: LinkedInHeroCardProps) {
                 loading="lazy"
                 onLoad={() => setAvatarLoaded(true)}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
-                  avatarLoaded ? 'opacity-100' : 'opacity-0'
+                  avatarLoaded ? "opacity-100" : "opacity-0"
                 }`}
               />
             </>
           ) : (
             <svg viewBox="0 0 128 128" className="w-full h-full">
               <path fill="#e7e2dc" d="M0 0h128v128H0z" />
-              <path d="M88.41 84.67a32 32 0 10-48.82 0 66.13 66.13 0 0148.82 0z" fill="#788fa5" />
-              <path d="M88.41 84.67a32 32 0 01-48.82 0A66.79 66.79 0 000 128h128a66.79 66.79 0 00-39.59-43.33z" fill="#9db3c8" />
-              <path d="M64 96a31.93 31.93 0 0024.41-11.33 66.13 66.13 0 00-48.82 0A31.93 31.93 0 0064 96z" fill="#56687a" />
+              <path
+                d="M88.41 84.67a32 32 0 10-48.82 0 66.13 66.13 0 0148.82 0z"
+                fill="#788fa5"
+              />
+              <path
+                d="M88.41 84.67a32 32 0 01-48.82 0A66.79 66.79 0 000 128h128a66.79 66.79 0 00-39.59-43.33z"
+                fill="#9db3c8"
+              />
+              <path
+                d="M64 96a31.93 31.93 0 0024.41-11.33 66.13 66.13 0 00-48.82 0A31.93 31.93 0 0064 96z"
+                fill="#56687a"
+              />
             </svg>
           )}
         </div>
@@ -97,8 +110,15 @@ export function LinkedInHeroCard({ link }: LinkedInHeroCardProps) {
       {/* Bottom row: favicon + url | LinkedIn logo */}
       <div className="flex items-center justify-between px-4 pb-3 pt-2.5 mt-4">
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <Favicon src={favicon?.url} domain={link.domain} alt={link.domain} size={14} />
-          <span className="text-neutral-400 text-xs truncate">{displayUrl}</span>
+          <Favicon
+            src={favicon?.url}
+            domain={link.domain}
+            alt={link.domain}
+            size={14}
+          />
+          <span className="text-neutral-400 text-xs truncate">
+            {displayUrl}
+          </span>
         </div>
         <img
           src="/linkedin-logo.png"

@@ -1,16 +1,16 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const LANGUAGES = [
-  { code: 'es', flag: '🇪🇸' },
-  { code: 'en', flag: '🇺🇸' },
+  { code: "es", flag: "🇪🇸" },
+  { code: "en", flag: "🇺🇸" },
 ] as const;
 
 export function LanguageToggle() {
   const { i18n } = useTranslation();
-  const current = i18n.language?.split('-')[0] || 'es';
+  const current = i18n.language?.split("-")[0] || "es";
 
   const toggle = () => {
-    const next = current === 'es' ? 'en' : 'es';
+    const next = current === "es" ? "en" : "es";
     i18n.changeLanguage(next);
   };
 

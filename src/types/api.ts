@@ -3,9 +3,9 @@ export interface FileResponseDto {
   id: number;
   path: string;
   url: string;
-  purpose?: 'image' | 'video' | 'favicon' | string;
-  visibility: 'public' | 'private';
-  status: 'pending' | 'analyzing' | 'analyzed' | 'error';
+  purpose?: "image" | "video" | "favicon" | string;
+  visibility: "public" | "private";
+  status: "pending" | "analyzing" | "analyzed" | "error";
   mimeType: string;
   size: number;
   width?: number;
@@ -24,7 +24,7 @@ export interface LinkCollectionDto {
   slug: string;
   description?: string;
   visibility: string;
-  collectionLinkVisibility?: 'private' | 'public' | null;
+  collectionLinkVisibility?: "private" | "public" | null;
   isFeatured: boolean;
   isPinned: boolean;
   createdAt: string;
@@ -40,8 +40,8 @@ export interface LinkResponseDto {
   title: string;
   description?: string;
   slug: string;
-  visibility: 'private' | 'public';
-  effectiveVisibility?: 'private' | 'public';
+  visibility: "private" | "public";
+  effectiveVisibility?: "private" | "public";
   ogTitle?: string;
   ogDescription?: string;
   ogSiteName?: string;
@@ -56,11 +56,16 @@ export interface LinkResponseDto {
   platformPostId?: string;
   platformPostCaption?: string;
   platformPostTitle?: string;
-  status: 'pending' | 'analyzing' | 'analyzed' | 'error';
+  status: "pending" | "analyzing" | "analyzed" | "error";
   createdAt: string;
   updatedAt: string;
   files: FileResponseDto[];
-  user?: { id: number; username: string; firstName?: string; lastName?: string };
+  user?: {
+    id: number;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  };
   collection?: LinkCollectionDto;
   collections: LinkCollectionDto[];
 }

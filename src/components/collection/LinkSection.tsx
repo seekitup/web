@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { LinkResponseDto } from '@/types/api';
-import { LinkCard } from '@/components/collection/LinkCard';
-import { CompactLinkCard } from '@/components/collection/CompactLinkCard';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
+import type { LinkResponseDto } from "@/types/api";
+import { LinkCard } from "@/components/collection/LinkCard";
+import { CompactLinkCard } from "@/components/collection/CompactLinkCard";
 
 interface LinkSectionProps {
   links: LinkResponseDto[];
-  view: 'list' | 'grid';
+  view: "list" | "grid";
   visibleLinkId: number | null;
   onVisibilityChange: (id: number, isVisible: boolean) => void;
 }
@@ -39,16 +39,14 @@ export function LinkSection({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-neutral-500 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+          className={`text-neutral-500 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
         >
           <polyline points="9 18 15 12 9 6" />
         </svg>
         <span className="text-neutral-400 text-sm font-medium">
-          {t('linkSection.title')}
+          {t("linkSection.title")}
         </span>
-        <span className="text-neutral-600 text-xs">
-          ({links.length})
-        </span>
+        <span className="text-neutral-600 text-xs">({links.length})</span>
       </button>
 
       {/* Content */}
@@ -56,15 +54,26 @@ export function LinkSection({
         {expanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-1 gap-3' : 'space-y-4'}>
+            <div
+              className={
+                view === "grid"
+                  ? "grid grid-cols-1 sm:grid-cols-1 gap-3"
+                  : "space-y-4"
+              }
+            >
               {links.map((link, index) =>
-                view === 'grid' ? (
-                  <CompactLinkCard key={link.id} link={link} index={index} itemId={`link-${link.id}`} />
+                view === "grid" ? (
+                  <CompactLinkCard
+                    key={link.id}
+                    link={link}
+                    index={index}
+                    itemId={`link-${link.id}`}
+                  />
                 ) : (
                   <LinkCard
                     key={link.id}

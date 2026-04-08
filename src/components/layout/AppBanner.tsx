@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { getStoreUrl } from '@/lib/platform';
+import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useParams, useLocation } from "react-router-dom";
+import { getStoreUrl } from "@/lib/platform";
 
 interface AppBannerProps {
   dismissed: boolean;
@@ -28,7 +28,7 @@ export function AppBanner({ dismissed, onDismiss }: AppBannerProps) {
     const start = Date.now();
     const timeout = setTimeout(() => {
       if (Date.now() - start < 2000) {
-        window.location.href = storeUrl ?? '/download';
+        window.location.href = storeUrl ?? "/download";
       }
     }, 1500);
 
@@ -37,9 +37,9 @@ export function AppBanner({ dismissed, onDismiss }: AppBannerProps) {
         clearTimeout(timeout);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibility);
+    document.addEventListener("visibilitychange", handleVisibility);
     setTimeout(
-      () => document.removeEventListener('visibilitychange', handleVisibility),
+      () => document.removeEventListener("visibilitychange", handleVisibility),
       3000,
     );
 
@@ -62,10 +62,10 @@ export function AppBanner({ dismissed, onDismiss }: AppBannerProps) {
           </div>
           <div className="min-w-0">
             <p className="text-white text-sm font-semibold truncate">
-              {t('common.seekitup')}
+              {t("common.seekitup")}
             </p>
             <p className="text-white/60 text-xs truncate">
-              {t('appBanner.tagline')}
+              {t("appBanner.tagline")}
             </p>
           </div>
         </div>
@@ -77,7 +77,7 @@ export function AppBanner({ dismissed, onDismiss }: AppBannerProps) {
               onClick={handleOpenInApp}
               className="bg-primary text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary-dark transition-colors cursor-pointer"
             >
-              {t('appBanner.openInApp')}
+              {t("appBanner.openInApp")}
             </button>
           ) : storeUrl ? (
             <a
@@ -86,14 +86,14 @@ export function AppBanner({ dismissed, onDismiss }: AppBannerProps) {
               rel="noopener noreferrer"
               className="bg-primary text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary-dark transition-colors no-underline cursor-pointer"
             >
-              {t('appBanner.getTheApp')}
+              {t("appBanner.getTheApp")}
             </a>
           ) : (
             <Link
               to="/download"
               className="bg-primary text-black text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary-dark transition-colors no-underline cursor-pointer"
             >
-              {t('appBanner.getTheApp')}
+              {t("appBanner.getTheApp")}
             </Link>
           )}
           {/* <button

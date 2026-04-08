@@ -1,8 +1,5 @@
-import { useState } from 'react';
-import {
-  getYouTubeEmbedUrl,
-  getYouTubeThumbnailUrl,
-} from '@/lib/linkUtils';
+import { useState } from "react";
+import { getYouTubeEmbedUrl, getYouTubeThumbnailUrl } from "@/lib/linkUtils";
 
 interface YouTubeEmbedProps {
   videoId: string;
@@ -11,13 +8,18 @@ interface YouTubeEmbedProps {
   title: string;
 }
 
-export function YouTubeEmbed({ videoId, isVisible, isShort, title }: YouTubeEmbedProps) {
+export function YouTubeEmbed({
+  videoId,
+  isVisible,
+  isShort,
+  title,
+}: YouTubeEmbedProps) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const thumbnailUrl = getYouTubeThumbnailUrl(videoId);
 
   const containerClass = isShort
-    ? 'aspect-[9/16] max-h-[80vh] max-w-[360px] mx-auto bg-black'
-    : 'aspect-video bg-black';
+    ? "aspect-[9/16] max-h-[80vh] max-w-[360px] mx-auto bg-black"
+    : "aspect-video bg-black";
 
   return (
     <div className={`relative w-full overflow-hidden ${containerClass}`}>
@@ -45,7 +47,7 @@ export function YouTubeEmbed({ videoId, isVisible, isShort, title }: YouTubeEmbe
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           onLoad={() => setIframeLoaded(true)}
           className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${
-            iframeLoaded ? 'opacity-100' : 'opacity-0'
+            iframeLoaded ? "opacity-100" : "opacity-0"
           }`}
         />
       )}

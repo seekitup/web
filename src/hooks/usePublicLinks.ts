@@ -1,12 +1,12 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import type { LinkResponseDto } from '@/types/api';
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import type { LinkResponseDto } from "@/types/api";
 
 const PAGE_SIZE = 20;
 
 export function usePublicLinks(collectionId: number | undefined) {
   return useInfiniteQuery({
-    queryKey: ['links', 'public', 'infinite', collectionId],
+    queryKey: ["links", "public", "infinite", collectionId],
     queryFn: ({ pageParam }) =>
       api.links.listPublic({
         collectionId: collectionId!,
