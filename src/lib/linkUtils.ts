@@ -1,6 +1,43 @@
 import type { LinkResponseDto, FileResponseDto, LookupPreviewLinkDto } from '@/types/api';
 
 /**
+ * Check if a link is a MercadoLibre product with price data.
+ */
+export const isMercadoLibreProduct = (link: LinkResponseDto): boolean => {
+  if (!link.domain) return false;
+  const domain = link.domain.toLowerCase();
+  const isMeli = domain.includes('mercadolibre') || domain.includes('mercadolivre');
+  return isMeli && !!link.productPrice && link.productPrice > 0;
+};
+
+/**
+ * Check if a link is a LinkedIn profile or company page.
+ */
+export const isLinkedInProfile = (link: LinkResponseDto): boolean => {
+  if (!link.domain) return false;
+  const domain = link.domain.toLowerCase();
+  if (!domain.includes('linkedin.com')) return false;
+  return /\/in\/[A-Za-z0-9-]+/.test(link.url) || /\/company\/[A-Za-z0-9-]+/.test(link.url);
+};
+
+/**
+ * Get the LinkedIn profile picture file (profile_picture purpose, fallback to image/og_image).
+ */
+export const getLinkedInProfilePicture = (link: LinkResponseDto): FileResponseDto | undefined => {
+  return (
+    link.files?.find((f) => f.purpose === 'profile_picture') ||
+    link.files?.find((f) => f.purpose === 'image' || f.purpose === 'og_image')
+  );
+};
+
+/**
+ * Get the LinkedIn cover/background image file.
+ */
+export const getLinkedInCoverImage = (link: LinkResponseDto): FileResponseDto | undefined => {
+  return link.files?.find((f) => f.purpose === 'cover_image');
+};
+
+/**
  * Get the display title for a link.
  * Priority order when title === ogTitle:
  * 1. platformPostTitle
@@ -207,4 +244,30 @@ export const formatLinkPrice = (
     return `${symbol}${formattedNumber} ${currencyCode}`;
   }
   return `${formattedNumber} ${currencyCode}`;
+};
+
+/**
+ * Format a price for MercadoLibre display.
+ * Pesos (ARS, CLP, COP, MXN, UYU): "$140.000" (symbol + number only)
+ * Other currencies: "USD 140.000" (code + number, no symbol)
+ */
+const PESO_CURRENCIES = new Set(['ARS', 'CLP', 'COP', 'MXN', 'UYU']);
+
+export const formatMeliPrice = (
+  price: number | undefined | null,
+  currency: string | undefined | null,
+): string | null => {
+  if (price === undefined || price === null || price <= 0) return null;
+
+  const currencyCode = currency?.toUpperCase() || 'USD';
+  const formattedNumber = new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: price % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(price);
+
+  const symbol = CURRENCY_SYMBOLS[currencyCode] || '';
+  if (PESO_CURRENCIES.has(currencyCode)) {
+    return symbol ? `${symbol}${formattedNumber}` : formattedNumber;
+  }
+  return `${currencyCode} ${formattedNumber}`;
 };

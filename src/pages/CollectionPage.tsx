@@ -11,7 +11,7 @@ import { CollectionNavigator } from '@/components/collection/CollectionNavigator
 import { ViewToggle } from '@/components/collection/ViewToggle';
 import { ChildCollectionSection } from '@/components/collection/ChildCollectionSection';
 import { LinkSection } from '@/components/collection/LinkSection';
-import { LinkCardSkeleton, CollectionHeaderSkeleton } from '@/components/collection/LinkCardSkeleton';
+import { CollectionLoader } from '@/components/collection/CollectionLoader';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { getLinkPrimaryMedia, getPreviewImageUrl, getLinkThumbnailUrl, getLinkFavicon } from '@/lib/linkUtils';
 import type { NavigatorItem } from '@/components/collection/NavigatorPill';
@@ -126,13 +126,8 @@ export function CollectionPage() {
   // Loading state
   if (collectionLoading) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <CollectionHeaderSkeleton />
-        <div className="px-4 space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <LinkCardSkeleton key={i} variant={view} />
-          ))}
-        </div>
+      <div className="mx-auto max-w-xl w-full">
+        <CollectionLoader className="min-h-[60vh]" />
       </div>
     );
   }
@@ -180,11 +175,7 @@ export function CollectionPage() {
 
         {/* Links */}
         {linksLoading ? (
-          <div className={`px-4 ${view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-1 gap-3' : 'space-y-4'}`}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <LinkCardSkeleton key={i} variant={view} />
-            ))}
-          </div>
+          <CollectionLoader className="py-16" />
         ) : links.length === 0 ? (
           <div className="px-4 py-16 text-center">
             <p className="text-neutral-500 text-sm">{t('collectionPage.emptyLinks')}</p>

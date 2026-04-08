@@ -2,16 +2,16 @@ import type { Translations } from "./en"
 
 const es: Translations = {
   common: {
-    seekitup: "SeekItUp",
+    seekitup: "Seekitup",
     link_one: "{{count}} link",
     link_other: "{{count}} links",
     comingSoon: "Próximamente",
   },
 
   downloadPage: {
-    metaTitle: "Descargá SeekItUp — Guardá y Compartí tus Links",
+    metaTitle: "Descargá Seekitup — Guardá y Compartí tus Links",
     metaDescription:
-      "SeekItUp te ayuda a guardar, organizar y compartir tus links favoritos en colecciones hermosas. Descargalo ahora para iOS y Android.",
+      "Seekitup te ayuda a guardar, organizar y compartir tus links favoritos en colecciones hermosas. Descargalo ahora para iOS y Android.",
     heading: "Guardá, organizá y",
     headingHighlight: "compartí",
     headingEnd: "tus links favoritos",
@@ -20,23 +20,23 @@ const es: Translations = {
   },
 
   collectionPage: {
-    metaTitleNotFound: "Colección no encontrada | SeekItUp",
-    metaTitle: "{{name}} por @{{username}} | SeekItUp",
-    metaDescriptionFallback: "Explorá {{name}} en SeekItUp",
+    metaTitleNotFound: "Colección no encontrada | Seekitup",
+    metaTitle: "{{name}} por @{{username}} | Seekitup",
+    metaDescriptionFallback: "Explorá {{name}} en Seekitup",
     ogDescriptionFallback: "Una colección de @{{username}}",
     errorTitle: "Colección no encontrada",
     errorDescription:
       "Esta colección puede haber sido eliminada, configurada como privada, o no existe.",
-    errorCta: "Descargá SeekItUp",
+    errorCta: "Descargá Seekitup",
     emptyLinks: "No hay links en esta colección todavía.",
   },
 
   notFoundPage: {
-    metaTitle: "Página no encontrada | SeekItUp",
+    metaTitle: "Página no encontrada | Seekitup",
     title: "Página no encontrada",
     description:
       "La página que estás buscando no existe o fue movida.",
-    cta: "Descargá SeekItUp",
+    cta: "Descargá Seekitup",
   },
 
   appBanner: {

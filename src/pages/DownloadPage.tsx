@@ -32,7 +32,7 @@ export function DownloadPage() {
           {/* Logo */}
           <img
             src="/logo-square.png"
-            alt="SeekItUp"
+            alt="Seekitup"
             className="w-16 h-16 object-contain mx-auto mb-6"
           />
 
