@@ -14,7 +14,10 @@ export function useActiveItemTracker(itemIds: string[]) {
   // Timestamp until which observer changes are suppressed (smooth scroll guard)
   const forcedUntilRef = useRef<number>(0);
   const itemIdsRef = useRef(itemIds);
-  itemIdsRef.current = itemIds;
+
+  useEffect(() => {
+    itemIdsRef.current = itemIds;
+  }, [itemIds]);
 
   const flush = useCallback(() => {
     rafRef.current = null;
@@ -130,7 +133,7 @@ export function useActiveItemTracker(itemIds: string[]) {
     : null;
 
   // Keep the old handleVisibilityChange interface working for LinkCard
-  const handleVisibilityChange = useCallback((_linkId: number, _inView: boolean) => {
+  const handleVisibilityChange = useCallback(() => {
     // No-op: active tracking is now handled by the IntersectionObserver above
   }, []);
 
