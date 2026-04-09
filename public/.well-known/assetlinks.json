@@ -4,7 +4,9 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.seekitup",
-      "sha256_cert_fingerprints": ["ANDROID_SHA256_FINGERPRINT"]
+      "sha256_cert_fingerprints": [
+        "4D:A2:4C:35:0A:20:4C:86:53:E7:6D:23:54:4B:1D:93:B5:F4:70:5E:02:36:CB:9F:27:06:5A:04:62:53:0D:5C"
+      ]
     }
   }
 ]

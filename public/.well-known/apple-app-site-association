@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "APPLE_TEAM_ID.com.seekitup",
+        "appID": "Z7XFN4U35R.com.seekitup",
         "paths": [
           "NOT /api/*",
           "NOT /auth/*",
