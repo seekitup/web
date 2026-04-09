@@ -23,7 +23,6 @@ import {
   isYouTubeLink,
   isYouTubeShort,
   extractYouTubeVideoId,
-  getYouTubeThumbnailUrl,
   getVideoThumbnailUrl,
 } from '@/lib/linkUtils';
 
