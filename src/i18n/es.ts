@@ -31,6 +31,21 @@ const es: Translations = {
     emptyLinks: "No hay links en esta colección todavía.",
   },
 
+  invitationPage: {
+    metaTitle: "{{inviter}} te invitó a {{name}} | Seekitup",
+    title: "{{name}} te invitó",
+    subtitle: "a colaborar en una colección",
+    collectionLabel: "Colección",
+    itemCount_one: "{{count}} link",
+    itemCount_other: "{{count}} links",
+    description:
+      "Aceptá esta invitación desde la app de Seekitup para empezar a colaborar.",
+    alreadyAcceptedTitle: "Ya aceptaste esta invitación",
+    alreadyAcceptedDescription:
+      "Abrí Seekitup en tu dispositivo para ver la colección.",
+    viewCollection: "Ver colección en la web",
+  },
+
   notFoundPage: {
     metaTitle: "Página no encontrada | Seekitup",
     title: "Página no encontrada",

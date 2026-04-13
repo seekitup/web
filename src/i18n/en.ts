@@ -29,6 +29,21 @@ const en = {
     emptyLinks: "No links in this collection yet.",
   },
 
+  invitationPage: {
+    metaTitle: "{{inviter}} invited you to {{name}} | Seekitup",
+    title: "{{name}} invited you",
+    subtitle: "to collaborate on a collection",
+    collectionLabel: "Collection",
+    itemCount_one: "{{count}} link",
+    itemCount_other: "{{count}} links",
+    description:
+      "Accept this invitation from the Seekitup app to start collaborating.",
+    alreadyAcceptedTitle: "You've already accepted this invitation",
+    alreadyAcceptedDescription:
+      "Open Seekitup on your device to view the collection.",
+    viewCollection: "View collection on the web",
+  },
+
   notFoundPage: {
     metaTitle: "Page not found | Seekitup",
     title: "Page not found",

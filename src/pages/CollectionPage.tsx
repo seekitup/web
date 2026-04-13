@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useInView } from 'react-intersection-observer';
 import { useCollectionLookup } from '@/hooks/useCollectionLookup';
+import { useInvitationLookup } from '@/hooks/useInvitationLookup';
 import { usePublicLinks, flattenLinks } from '@/hooks/usePublicLinks';
 import { useActiveItemTracker } from '@/hooks/useActiveItemTracker';
 import { CollectionHeader } from '@/components/collection/CollectionHeader';
@@ -13,6 +14,7 @@ import { ChildCollectionSection } from '@/components/collection/ChildCollectionS
 import { LinkSection } from '@/components/collection/LinkSection';
 import { CollectionLoader } from '@/components/collection/CollectionLoader';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { InvitationLanding } from '@/components/invite/InvitationLanding';
 import { getLinkPrimaryMedia, getPreviewImageUrl, getLinkThumbnailUrl, getLinkFavicon } from '@/lib/linkUtils';
 import type { NavigatorItem } from '@/components/collection/NavigatorPill';
 
@@ -21,6 +23,8 @@ const VIEW_KEY = 'seekitup-view-mode';
 export function CollectionPage() {
   const { t } = useTranslation();
   const { username = '', slug = '' } = useParams<{ username: string; slug: string }>();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite');
 
   const [view, setView] = useState<'list' | 'grid'>(() => {
     return (localStorage.getItem(VIEW_KEY) as 'list' | 'grid') || 'list';
@@ -30,12 +34,27 @@ export function CollectionPage() {
     localStorage.setItem(VIEW_KEY, view);
   }, [view]);
 
+  // Invitation lookup — only enabled when the URL carries ?invite=<token>.
+  const {
+    data: invitation,
+    isLoading: invitationLoading,
+    isError: invitationError,
+  } = useInvitationLookup(inviteToken);
+
+  // Hide the invitation branch entirely once we know the token is bad,
+  // and skip the public collection fetch while we're about to render the
+  // invitation landing page.
+  const showInvitation = !!inviteToken && !invitationError;
+
   // Fetch collection
   const {
     data: collection,
     isLoading: collectionLoading,
     isError,
-  } = useCollectionLookup(username, slug);
+  } = useCollectionLookup(
+    showInvitation ? '' : username,
+    showInvitation ? '' : slug,
+  );
 
   // Fetch links (enabled when collection is loaded)
   const {
@@ -101,6 +120,37 @@ export function CollectionPage() {
 
   // OG image from first link
   const ogImage = links.length > 0 ? getLinkPrimaryMedia(links[0])?.url : undefined;
+
+  // Invitation branch: renders the dedicated landing page when the URL
+  // carries a valid ?invite=<token>. Invalid/expired tokens fall through to
+  // the normal public collection view below.
+  if (showInvitation) {
+    if (invitationLoading) {
+      return (
+        <div className="mx-auto max-w-xl w-full">
+          <CollectionLoader className="min-h-[60vh]" />
+        </div>
+      );
+    }
+
+    if (invitation) {
+      const inviterName = invitation.inviter.firstName || invitation.inviter.username;
+      return (
+        <>
+          <Helmet>
+            <title>
+              {t('invitationPage.metaTitle', {
+                name: invitation.collection.name,
+                inviter: inviterName,
+              })}
+            </title>
+            <meta name="robots" content="noindex" />
+          </Helmet>
+          <InvitationLanding invitation={invitation} />
+        </>
+      );
+    }
+  }
 
   // Error state
   if (isError) {

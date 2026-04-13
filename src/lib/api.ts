@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type {
+  CollectionInvitationLookupResponseDto,
   CollectionLookupResponseDto,
   LinkResponseDto,
   PaginatedResponse,
@@ -21,6 +22,14 @@ export const collectionsApi = {
   ): Promise<CollectionLookupResponseDto> => {
     const response = await apiClient.get(
       `/api/v1/collections/lookup/${username}/${slug}`,
+    );
+    return response.data;
+  },
+  lookupInvitation: async (
+    token: string,
+  ): Promise<CollectionInvitationLookupResponseDto> => {
+    const response = await apiClient.get(
+      `/api/v1/collections/invitations/${encodeURIComponent(token)}`,
     );
     return response.data;
   },

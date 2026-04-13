@@ -130,6 +130,33 @@ export interface CollectionLookupResponseDto {
   childCollections: LookupChildCollectionDto[];
 }
 
+// Collection invitation types
+export interface InvitationInviterDto {
+  id: number;
+  username: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  image?: LookupFileDto | null;
+}
+
+export interface InvitationCollectionDto {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  username: string;
+  itemCount: number;
+  isPublic: boolean;
+}
+
+export interface CollectionInvitationLookupResponseDto {
+  status: 'pending' | 'accepted';
+  roleName: string;
+  invitedEmail: string;
+  inviter: InvitationInviterDto;
+  collection: InvitationCollectionDto;
+}
+
 // Pagination types
 export interface PaginationMeta {
   page: number;
