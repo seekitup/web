@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const AVATAR_COLORS = [
   '#E53935',
@@ -50,10 +50,14 @@ interface AvatarProps {
 
 export function Avatar({ user, size = 28, className = '' }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
-
-  useEffect(() => {
+  const [lastImageKey, setLastImageKey] = useState<string | undefined>(
+    user.image ? `${user.image.id}-${user.image.url}` : undefined,
+  );
+  const currentImageKey = user.image ? `${user.image.id}-${user.image.url}` : undefined;
+  if (lastImageKey !== currentImageKey) {
+    setLastImageKey(currentImageKey);
     setImageError(false);
-  }, [user.image?.id, user.image?.url]);
+  }
 
   const getInitials = (): string => {
     if (user.firstName && user.lastName) {

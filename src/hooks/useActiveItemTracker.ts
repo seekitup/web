@@ -14,7 +14,9 @@ export function useActiveItemTracker(itemIds: string[]) {
   // Timestamp until which observer changes are suppressed (smooth scroll guard)
   const forcedUntilRef = useRef<number>(0);
   const itemIdsRef = useRef(itemIds);
-  itemIdsRef.current = itemIds;
+  useEffect(() => {
+    itemIdsRef.current = itemIds;
+  });
 
   const flush = useCallback(() => {
     rafRef.current = null;

@@ -47,7 +47,7 @@ type RecursiveKeyOf<TObj extends object> = {
   [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValue<TObj[TKey], `${TKey}`>
 }[keyof TObj & (string | number)]
 
-type RecursiveKeyOfHandleValue<TValue, Text extends string> = TValue extends any[]
+type RecursiveKeyOfHandleValue<TValue, Text extends string> = TValue extends readonly unknown[]
   ? Text
   : TValue extends object
     ? Text | `${Text}.${RecursiveKeyOf<TValue>}`
