@@ -56,6 +56,13 @@ export function CollectionPage() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Sentinel on the hero h1: once it slips behind the sticky navbar (h-14 = 56px),
+  // surface the compact sticky title bar above the horizontal preview scroll.
+  const { ref: titleSentinelRef, inView: titleInView } = useInView({
+    rootMargin: '-56px 0px 0px 0px',
+    initialInView: true,
+  });
+
   // Build navigator items from child collections + loaded links
   const navigatorItems: NavigatorItem[] = useMemo(() => {
     if (!collection) return [];
@@ -148,16 +155,17 @@ export function CollectionPage() {
 
       <div className="mx-auto max-w-xl w-full">
         {/* Header */}
-        <CollectionHeader collection={collection} />
+        <CollectionHeader collection={collection} titleRef={titleSentinelRef} />
 
-        {/* Sticky horizontal navigator */}
-        {navigatorItems.length > 0 && (
-          <CollectionNavigator
-            items={navigatorItems}
-            activeItemId={activeItemId}
-            onItemClick={handleNavigatorClick}
-          />
-        )}
+        {/* Sticky chrome: compact title + horizontal navigator */}
+        <CollectionNavigator
+          items={navigatorItems}
+          activeItemId={activeItemId}
+          onItemClick={handleNavigatorClick}
+          collectionName={collection.name}
+          totalLinks={collection.totalLinks}
+          showCompactTitle={!titleInView}
+        />
 
         {/* View toggle + controls */}
         <div className="pb-3">
