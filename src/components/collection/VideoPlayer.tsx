@@ -3,10 +3,10 @@ import { useVideoAudio } from '@/hooks/useVideoAudio';
 
 interface VideoPlayerProps {
   src: string;
-  poster?: string;
+  poster?: string | undefined;
   isVisible: boolean;
-  aspectRatio?: string;
-  maxHeight?: string;
+  aspectRatio?: string | undefined;
+  maxHeight?: string | undefined;
 }
 
 export function VideoPlayer({ src, poster, isVisible, aspectRatio = '16 / 9', maxHeight = '400px' }: VideoPlayerProps) {

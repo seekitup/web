@@ -119,7 +119,7 @@ export function CollectionPage() {
   }, [forceActive]);
 
   // OG image from first link
-  const ogImage = links.length > 0 ? getLinkPrimaryMedia(links[0])?.url : undefined;
+  const ogImage = links.length > 0 ? getLinkPrimaryMedia(links[0]!)?.url : undefined;
 
   // Invitation branch: renders the dedicated landing page when the URL
   // carries a valid ?invite=<token>. Invalid/expired tokens fall through to

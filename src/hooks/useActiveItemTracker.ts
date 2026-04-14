@@ -39,7 +39,7 @@ export function useActiveItemTracker(itemIds: string[]) {
         document.documentElement.scrollHeight - 80;
 
     if (atBottom) {
-      setObservedActiveId(ids[ids.length - 1]);
+      setObservedActiveId(ids[ids.length - 1] ?? null);
       return;
     }
 
@@ -73,7 +73,7 @@ export function useActiveItemTracker(itemIds: string[]) {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          const id = (entry.target as HTMLElement).dataset.itemId;
+          const id = (entry.target as HTMLElement).dataset['itemId'];
           if (id) {
             ratioMapRef.current.set(id, entry.intersectionRatio);
           }

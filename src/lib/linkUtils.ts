@@ -142,7 +142,7 @@ export const isYouTubeShort = (url: string): boolean => {
 export const extractYouTubeVideoId = (url: string): string | null => {
   if (!url) return null;
   const match = url.match(YOUTUBE_REGEX);
-  return match ? match[1] : null;
+  return match?.[1] ?? null;
 };
 
 export const getYouTubeThumbnailUrl = (videoId: string): string => {

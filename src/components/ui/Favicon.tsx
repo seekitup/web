@@ -2,10 +2,10 @@ import { useState, useMemo } from 'react';
 import { getGoogleFaviconUrl } from '@/lib/linkUtils';
 
 interface FaviconProps {
-  src?: string;
-  domain?: string;
-  alt?: string;
-  size?: number;
+  src?: string | undefined;
+  domain?: string | undefined;
+  alt?: string | undefined;
+  size?: number | undefined;
 }
 
 type FaviconState = 'primary' | 'google' | 'fallback';

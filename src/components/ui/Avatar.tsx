@@ -31,21 +31,21 @@ const getColorFromName = (name: string): string => {
     hash = hash & hash;
   }
   const index = Math.abs(hash) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[index];
+  return AVATAR_COLORS[index]!;
 };
 
 export interface AvatarUser {
   id: number;
   username: string;
-  firstName?: string;
-  lastName?: string;
-  image?: { id: number; url: string } | null;
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  image?: { id: number; url: string } | null | undefined;
 }
 
 interface AvatarProps {
   user: AvatarUser;
-  size?: number;
-  className?: string;
+  size?: number | undefined;
+  className?: string | undefined;
 }
 
 export function Avatar({ user, size = 28, className = '' }: AvatarProps) {

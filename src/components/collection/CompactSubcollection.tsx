@@ -17,7 +17,7 @@ function ThumbnailCell({
   remaining,
 }: {
   link: LookupPreviewLinkDto;
-  remaining?: number;
+  remaining?: number | undefined;
 }) {
   const [loaded, setLoaded] = useState(false);
   const imageUrl = getPreviewImageUrl(link);
@@ -103,31 +103,31 @@ export function CompactSubcollection({
           ) : gridLinks.length === 1 ? (
             <div className="col-span-2 row-span-2">
               <ThumbnailCell
-                link={gridLinks[0]}
+                link={gridLinks[0]!}
                 remaining={remaining > 0 ? remaining : undefined}
               />
             </div>
           ) : gridLinks.length === 2 ? (
             <>
-              <ThumbnailCell link={gridLinks[0]} />
-              <ThumbnailCell link={gridLinks[1]} />
+              <ThumbnailCell link={gridLinks[0]!} />
+              <ThumbnailCell link={gridLinks[1]!} />
               <EmptyCell />
               <EmptyCell />
             </>
           ) : gridLinks.length === 3 ? (
             <>
-              <ThumbnailCell link={gridLinks[0]} />
-              <ThumbnailCell link={gridLinks[1]} />
-              <ThumbnailCell link={gridLinks[2]} />
+              <ThumbnailCell link={gridLinks[0]!} />
+              <ThumbnailCell link={gridLinks[1]!} />
+              <ThumbnailCell link={gridLinks[2]!} />
               <EmptyCell />
             </>
           ) : (
             <>
-              <ThumbnailCell link={gridLinks[0]} />
-              <ThumbnailCell link={gridLinks[1]} />
-              <ThumbnailCell link={gridLinks[2]} />
+              <ThumbnailCell link={gridLinks[0]!} />
+              <ThumbnailCell link={gridLinks[1]!} />
+              <ThumbnailCell link={gridLinks[2]!} />
               <ThumbnailCell
-                link={gridLinks[3]}
+                link={gridLinks[3]!}
                 remaining={remaining > 0 ? remaining : undefined}
               />
             </>
