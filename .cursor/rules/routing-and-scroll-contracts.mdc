@@ -1,0 +1,26 @@
+---
+description: Protect route semantics and collection sticky-scroll contracts
+globs: "{src/App.tsx,src/pages/CollectionPage.tsx,src/components/collection/**/*.tsx,src/hooks/useActiveItemTracker.ts}"
+alwaysApply: false
+---
+
+# Routing Contracts
+
+Preserve public route behavior unless the task explicitly changes product requirements:
+
+- `/` and `/download` render the download experience.
+- `/:username/:slug` renders public collection.
+- `/:username/:slug?invite=<token>` remains invitation-first when token is valid.
+
+# Sticky Navigator Contracts
+
+When editing collection navigation/scroll behavior:
+
+- Preserve `data-item-id` and `data-nav-id` data attribute contracts.
+- Keep navbar/sticky offset assumptions consistent (`h-14` / 56px baseline).
+- Verify active pill tracking and scroll-centering behavior after changes.
+
+# Regression Awareness
+
+- Treat these contracts as user-facing behavior guarantees.
+- If a refactor risks behavior drift, call it out and validate manually.
