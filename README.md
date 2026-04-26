@@ -14,13 +14,13 @@ Public web app for Seekitup collections and invitation landings.
 ## Requirements
 
 - Node.js 20+ (recommended)
-- npm 10+
+- Yarn 1.22+
 
 ## Run Locally
 
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 App starts on Vite default port (usually `5173`).
@@ -38,10 +38,10 @@ VITE_API_URL=http://localhost:3000
 
 ## Scripts
 
-- `npm run dev`: start dev server
-- `npm run build`: type-check and production build
-- `npm run lint`: run ESLint
-- `npm run preview`: serve built app locally
+- `yarn dev`: start dev server
+- `yarn build`: type-check and production build
+- `yarn lint`: run ESLint
+- `yarn preview`: serve built app locally
 
 ## App Routes
 

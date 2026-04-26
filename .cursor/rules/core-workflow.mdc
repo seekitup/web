@@ -16,8 +16,8 @@ Follow this default sequence unless the user requests otherwise:
 
 For substantive code changes, complete all of the following:
 
-- Run `npm run lint`.
-- Run `npm run build`.
+- Run `yarn lint`.
+- Run `yarn build`.
 - Report command outcomes and any unresolved risks.
 - Include brief manual verification notes for affected flows when applicable.
 

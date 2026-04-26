@@ -86,8 +86,8 @@ Base URL: `VITE_API_URL` (fallback `http://localhost:3000`)
 Run after substantive edits:
 
 ```bash
-npm run lint
-npm run build
+yarn lint
+yarn build
 ```
 
 Manual checks:
