@@ -1,14 +1,14 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useInView } from 'react-intersection-observer';
-import { motion } from 'framer-motion';
-import type { LinkResponseDto } from '@/types/api';
-import { Favicon } from '@/components/ui/Favicon';
-import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
-import { YouTubeEmbed } from '@/components/collection/YouTubeEmbed';
-import { VideoPlayer } from '@/components/collection/VideoPlayer';
-import { MercadoLibreHeroCard } from '@/components/collection/MercadoLibreHeroCard';
-import { LinkedInHeroCard } from '@/components/collection/LinkedInHeroCard';
+import { useEffect, useRef, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
+import { motion } from "framer-motion";
+import type { LinkResponseDto } from "@/types/api";
+import { Favicon } from "@/components/ui/Favicon";
+import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { YouTubeEmbed } from "@/components/collection/YouTubeEmbed";
+import { VideoPlayer } from "@/components/collection/VideoPlayer";
+import { MercadoLibreHeroCard } from "@/components/collection/MercadoLibreHeroCard";
+import { LinkedInHeroCard } from "@/components/collection/LinkedInHeroCard";
 import {
   getLinkDisplayTitle,
   getLinkPrimaryMedia,
@@ -24,7 +24,7 @@ import {
   isYouTubeShort,
   extractYouTubeVideoId,
   getVideoThumbnailUrl,
-} from '@/lib/linkUtils';
+} from "@/lib/linkUtils";
 
 interface LinkCardProps {
   link: LinkResponseDto;
@@ -34,7 +34,13 @@ interface LinkCardProps {
   itemId?: string;
 }
 
-export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }: LinkCardProps) {
+export function LinkCard({
+  link,
+  index,
+  isVisible,
+  onVisibilityChange,
+  itemId,
+}: LinkCardProps) {
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -59,7 +65,9 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
     : formatLinkPrice(link.productPrice, link.productPriceCurrency);
 
   // YouTube
-  const youtubeId = isYouTubeLink(link.url) ? extractYouTubeVideoId(link.url) : null;
+  const youtubeId = isYouTubeLink(link.url)
+    ? extractYouTubeVideoId(link.url)
+    : null;
   const isShort = youtubeId ? isYouTubeShort(link.url) : false;
 
   // Get all media files for carousel
@@ -84,7 +92,7 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
   const scrollTo = useCallback((idx: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ left: idx * el.offsetWidth, behavior: 'smooth' });
+    el.scrollTo({ left: idx * el.offsetWidth, behavior: "smooth" });
   }, []);
 
   const handleImageLoad = useCallback((key: string) => {
@@ -92,13 +100,21 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
   }, []);
 
   // Build carousel items
-  const carouselItems: Array<{ type: 'hero' | 'media'; key: string; url?: string }> = [];
+  const carouselItems: Array<{
+    type: "hero" | "media";
+    key: string;
+    url?: string;
+  }> = [];
   if (hasCarousel || isMeliProduct) {
     if (isMeliProduct) {
-      carouselItems.push({ type: 'hero', key: 'meli-hero' });
+      carouselItems.push({ type: "hero", key: "meli-hero" });
     }
     for (const file of allMediaFiles.slice(0, 10)) {
-      carouselItems.push({ type: 'media', key: file.id.toString(), url: file.url });
+      carouselItems.push({
+        type: "media",
+        key: file.id.toString(),
+        url: file.url,
+      });
     }
   }
 
@@ -108,7 +124,7 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
   const aspectRatio =
     primaryMedia?.width && primaryMedia?.height
       ? `${primaryMedia.width} / ${primaryMedia.height}`
-      : '16 / 9';
+      : "16 / 9";
 
   const motionProps = {
     initial: { opacity: 0, y: 20 },
@@ -128,10 +144,10 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
             ref={scrollRef}
             onScroll={handleScroll}
             className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {carouselItems.map((item) =>
-              item.type === 'hero' ? (
+              item.type === "hero" ? (
                 <div
                   key={item.key}
                   className="w-full shrink-0 snap-center"
@@ -154,7 +170,7 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
                     loading="lazy"
                     onLoad={() => handleImageLoad(item.key)}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                      loadedImages.has(item.key) ? 'opacity-100' : 'opacity-0'
+                      loadedImages.has(item.key) ? "opacity-100" : "opacity-0"
                     }`}
                   />
                 </div>
@@ -165,10 +181,23 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
           {activeIndex > 0 && (
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); scrollTo(activeIndex - 1); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollTo(activeIndex - 1);
+              }}
               className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
@@ -177,10 +206,23 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
           {activeIndex < totalSlides - 1 && (
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); scrollTo(activeIndex + 1); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollTo(activeIndex + 1);
+              }}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </button>
@@ -191,7 +233,9 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
               <div
                 key={item.key}
                 className={`w-1.5 h-1.5 rounded-full transition-opacity duration-200 ${
-                  i === activeIndex ? 'bg-white opacity-100' : 'bg-white opacity-50'
+                  i === activeIndex
+                    ? "bg-white opacity-100"
+                    : "bg-white opacity-50"
                 }`}
               />
             ))}
@@ -213,18 +257,20 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
         />
       ) : primaryMedia?.url ? (
         <>
-          {!loadedImages.has('single') && (
+          {!loadedImages.has("single") && (
             <div className="w-full aspect-video animate-pulse bg-neutral-700" />
           )}
           <img
             src={primaryMedia.url}
             alt={title}
             loading="lazy"
-            onLoad={() => handleImageLoad('single')}
+            onLoad={() => handleImageLoad("single")}
             className={`w-full object-cover transition-opacity duration-300 ${
-              loadedImages.has('single') ? 'opacity-100' : 'opacity-0 absolute inset-0'
+              loadedImages.has("single")
+                ? "opacity-100"
+                : "opacity-0 absolute inset-0"
             }`}
-            style={{ aspectRatio, maxHeight: '400px' }}
+            style={{ aspectRatio, maxHeight: "400px" }}
           />
         </>
       ) : (
@@ -245,8 +291,15 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
               {title}
             </h3>
             <div className="flex items-center gap-2">
-              <Favicon src={favicon?.url} domain={link.domain} alt={link.domain} size={14} />
-              <span className="text-neutral-500 text-xs truncate">{sourceText}</span>
+              <Favicon
+                src={favicon?.url}
+                domain={link.domain}
+                alt={link.domain}
+                size={14}
+              />
+              <span className="text-neutral-500 text-xs truncate">
+                {sourceText}
+              </span>
             </div>
           </div>
           {price && (
@@ -269,8 +322,15 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
           </div>
 
           <div className="flex items-center gap-2">
-            <Favicon src={favicon?.url} domain={link.domain} alt={link.domain} size={14} />
-            <span className="text-neutral-500 text-xs truncate">{sourceText}</span>
+            <Favicon
+              src={favicon?.url}
+              domain={link.domain}
+              alt={link.domain}
+              size={14}
+            />
+            <span className="text-neutral-500 text-xs truncate">
+              {sourceText}
+            </span>
             {youtubeId && (
               <a
                 href={link.url}
@@ -279,7 +339,7 @@ export function LinkCard({ link, index, isVisible, onVisibilityChange, itemId }:
                 className="text-xs text-neutral-500 hover:text-primary transition-colors ml-auto inline-flex items-center gap-1"
                 onClick={(e) => e.stopPropagation()}
               >
-                {t('linkCard.watchOnYouTube')}
+                {t("linkCard.watchOnYouTube")}
               </a>
             )}
           </div>

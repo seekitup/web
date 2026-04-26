@@ -1,17 +1,17 @@
-import axios from 'axios';
+import axios from "axios";
 import type {
   CollectionInvitationLookupResponseDto,
   CollectionLookupResponseDto,
   LinkResponseDto,
   PaginatedResponse,
-} from '@/types/api';
+} from "@/types/api";
 
-const API_BASE_URL = import.meta.env['VITE_API_URL'] || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env["VITE_API_URL"] || "http://localhost:3000";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -41,7 +41,7 @@ export const linksApi = {
     page?: number;
     limit?: number;
   }): Promise<PaginatedResponse<LinkResponseDto>> => {
-    const response = await apiClient.get('/api/v1/links/public', { params });
+    const response = await apiClient.get("/api/v1/links/public", { params });
     return response.data;
   },
 };

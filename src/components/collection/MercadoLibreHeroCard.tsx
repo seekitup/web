@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import type { FileResponseDto } from '@/types/api';
+import { useState } from "react";
+import type { FileResponseDto } from "@/types/api";
 
 interface MercadoLibreHeroCardProps {
   mediaFiles: FileResponseDto[];
 }
 
-export function MercadoLibreHeroCard({ mediaFiles }: MercadoLibreHeroCardProps) {
+export function MercadoLibreHeroCard({
+  mediaFiles,
+}: MercadoLibreHeroCardProps) {
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   const imageFiles = mediaFiles.filter(
-    (f) => f.purpose === 'image' || f.purpose === 'og_image',
+    (f) => f.purpose === "image" || f.purpose === "og_image",
   );
 
   const primaryImage = imageFiles[0];
@@ -42,7 +44,7 @@ export function MercadoLibreHeroCard({ mediaFiles }: MercadoLibreHeroCardProps) 
               loading="lazy"
               onLoad={() => handleImageLoad(primaryImage.id)}
               className={`w-full h-full object-cover transition-opacity duration-300 ${
-                loadedImages.has(primaryImage.id) ? 'opacity-100' : 'opacity-0'
+                loadedImages.has(primaryImage.id) ? "opacity-100" : "opacity-0"
               }`}
             />
           </div>
@@ -54,7 +56,10 @@ export function MercadoLibreHeroCard({ mediaFiles }: MercadoLibreHeroCardProps) 
         {secondaryImages.length > 0 && (
           <div className="flex-[35] flex flex-col gap-1.5">
             {secondaryImages.map((file) => (
-              <div key={file.id} className="flex-1 relative rounded-lg overflow-hidden">
+              <div
+                key={file.id}
+                className="flex-1 relative rounded-lg overflow-hidden"
+              >
                 {!loadedImages.has(file.id) && (
                   <div className="absolute inset-0 animate-pulse bg-neutral-200" />
                 )}
@@ -64,7 +69,7 @@ export function MercadoLibreHeroCard({ mediaFiles }: MercadoLibreHeroCardProps) 
                   loading="lazy"
                   onLoad={() => handleImageLoad(file.id)}
                   className={`w-full h-full object-cover transition-opacity duration-300 ${
-                    loadedImages.has(file.id) ? 'opacity-100' : 'opacity-0'
+                    loadedImages.has(file.id) ? "opacity-100" : "opacity-0"
                   }`}
                 />
               </div>

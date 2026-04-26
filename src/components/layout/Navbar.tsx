@@ -1,12 +1,13 @@
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export function Navbar() {
   const { i18n } = useTranslation();
-  const current: 'es' | 'en' = i18n.language?.split('-')[0] === 'en' ? 'en' : 'es';
+  const current: "es" | "en" =
+    i18n.language?.split("-")[0] === "en" ? "en" : "es";
 
   const toggle = () => {
-    i18n.changeLanguage(current === 'es' ? 'en' : 'es');
+    i18n.changeLanguage(current === "es" ? "en" : "es");
   };
 
   return (
@@ -14,7 +15,11 @@ export function Navbar() {
       <div className="mx-auto max-w-xl flex items-center justify-between px-4 h-14">
         {/* Logo + Name */}
         <Link to="/" className="flex items-center gap-3 no-underline">
-          <img src="/logo-square.png" alt="Seekitup" className="w-5 h-5 object-contain" />
+          <img
+            src="/logo-square.png"
+            alt="Seekitup"
+            className="w-5 h-5 object-contain"
+          />
           <span className="text-white text-xl font-extrabold">Seekitup</span>
         </Link>
 
