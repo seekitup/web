@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 .env
-package-lock.json
 
 # Editor directories and files
 .vscode/*
@@ -25,9 +24,3 @@ package-lock.json
 *.sln
 *.sw?
 
-# Yarn Berry
-.pnp.*
-.yarn/*
-!.yarn/releases
-!.yarn/plugins
-!.yarn/patches

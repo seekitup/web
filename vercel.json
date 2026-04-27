@@ -1,5 +1,4 @@
 {
-  "installCommand": "corepack enable && yarn install --immutable",
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",
