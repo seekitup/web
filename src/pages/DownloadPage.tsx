@@ -1,7 +1,7 @@
-import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import { AppStoreBadges } from '@/components/download/AppStoreBadges';
+import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { AppStoreBadges } from "@/components/download/AppStoreBadges";
 
 export function DownloadPage() {
   const { t } = useTranslation();
@@ -9,11 +9,8 @@ export function DownloadPage() {
   return (
     <>
       <Helmet>
-        <title>{t('downloadPage.metaTitle')}</title>
-        <meta
-          name="description"
-          content={t('downloadPage.metaDescription')}
-        />
+        <title>{t("downloadPage.metaTitle")}</title>
+        <meta name="description" content={t("downloadPage.metaDescription")} />
       </Helmet>
 
       <section className="relative flex flex-1 flex-col items-center justify-center text-center px-6 py-16 overflow-hidden">
@@ -37,12 +34,16 @@ export function DownloadPage() {
           />
 
           <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-3">
-            {t('downloadPage.heading')}
-            <span className="text-primary"> {t('downloadPage.headingHighlight')}</span> {t('downloadPage.headingEnd')}
+            {t("downloadPage.heading")}
+            <span className="text-primary">
+              {" "}
+              {t("downloadPage.headingHighlight")}
+            </span>{" "}
+            {t("downloadPage.headingEnd")}
           </h1>
 
           <p className="text-neutral-400 text-base md:text-lg leading-relaxed mb-8 max-w-lg mx-auto">
-            {t('downloadPage.subtitle')}
+            {t("downloadPage.subtitle")}
           </p>
 
           <AppStoreBadges className="justify-center" />

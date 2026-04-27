@@ -1,14 +1,17 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
-import { Avatar } from '@/components/ui/Avatar';
-import type { CollectionLookupResponseDto } from '@/types/api';
+import { Avatar } from "@/components/ui/Avatar";
+import type { CollectionLookupResponseDto } from "@/types/api";
 
 interface CollectionHeaderProps {
   collection: CollectionLookupResponseDto;
   titleRef?: (node: HTMLHeadingElement | null) => void;
 }
 
-export function CollectionHeader({ collection, titleRef }: CollectionHeaderProps) {
+export function CollectionHeader({
+  collection,
+  titleRef,
+}: CollectionHeaderProps) {
   const { user, members } = collection;
 
   return (
@@ -39,9 +42,12 @@ export function CollectionHeader({ collection, titleRef }: CollectionHeaderProps
         <div className="flex items-center gap-3">
           <Avatar user={user} size={28} className="ring-2 ring-neutral-700" />
           <div className="flex flex-col">
-            {[user.firstName, user.lastName].filter(Boolean).join(' ').trim() && (
+            {[user.firstName, user.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() && (
               <span className="text-white text-sm font-semibold leading-tight">
-                {[user.firstName, user.lastName].filter(Boolean).join(' ')}
+                {[user.firstName, user.lastName].filter(Boolean).join(" ")}
               </span>
             )}
             <span className="text-neutral-500 text-xs font-medium leading-tight">

@@ -1,11 +1,10 @@
-export const APP_STORE_URL =
-  'https://apps.apple.com/app/seekitup/id6757165497';
+export const APP_STORE_URL = "https://apps.apple.com/app/seekitup/id6757165497";
 
 export const PLAY_STORE_URL =
-  'https://play.google.com/store/apps/details?id=com.seekitup.app';
+  "https://play.google.com/store/apps/details?id=com.seekitup.app";
 
 export function isIOS(): boolean {
-  if (typeof navigator === 'undefined') return false;
+  if (typeof navigator === "undefined") return false;
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) return true;
   // iPadOS 13+ reports as Macintosh but has multi-touch support
   if (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
@@ -14,7 +13,7 @@ export function isIOS(): boolean {
 }
 
 export function isAndroid(): boolean {
-  if (typeof navigator === 'undefined') return false;
+  if (typeof navigator === "undefined") return false;
   return /Android/i.test(navigator.userAgent);
 }
 

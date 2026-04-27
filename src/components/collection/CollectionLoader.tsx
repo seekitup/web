@@ -2,7 +2,7 @@ interface CollectionLoaderProps {
   className?: string;
 }
 
-export function CollectionLoader({ className = '' }: CollectionLoaderProps) {
+export function CollectionLoader({ className = "" }: CollectionLoaderProps) {
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <svg

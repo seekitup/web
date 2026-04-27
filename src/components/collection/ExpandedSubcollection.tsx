@@ -1,16 +1,19 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import type { LookupChildCollectionDto, LookupPreviewLinkDto } from '@/types/api';
-import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
-import { Favicon } from '@/components/ui/Favicon';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import type {
+  LookupChildCollectionDto,
+  LookupPreviewLinkDto,
+} from "@/types/api";
+import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { Favicon } from "@/components/ui/Favicon";
 import {
   isYouTubeLink,
   extractYouTubeVideoId,
   getPreviewImageUrl,
   formatLinkPrice,
-} from '@/lib/linkUtils';
+} from "@/lib/linkUtils";
 
 interface ExpandedSubcollectionProps {
   collection: LookupChildCollectionDto;
@@ -31,7 +34,7 @@ function getPreviewTitle(link: LookupPreviewLinkDto): string {
 // Use shared getPreviewImageUrl from linkUtils
 
 function getPreviewFavicon(link: LookupPreviewLinkDto): string | undefined {
-  const faviconFile = link.files.find((f) => f.purpose === 'favicon');
+  const faviconFile = link.files.find((f) => f.purpose === "favicon");
   return faviconFile?.url;
 }
 
@@ -46,7 +49,9 @@ function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
   const faviconUrl = getPreviewFavicon(link);
   const source = getPreviewSource(link);
   const price = formatLinkPrice(link.productPrice, link.productPriceCurrency);
-  const youtubeId = isYouTubeLink(link.url) ? extractYouTubeVideoId(link.url) : null;
+  const youtubeId = isYouTubeLink(link.url)
+    ? extractYouTubeVideoId(link.url)
+    : null;
 
   return (
     <a
@@ -68,7 +73,7 @@ function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
               className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
+                imageLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
             {youtubeId && imageLoaded && (
@@ -99,8 +104,15 @@ function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
           {title}
         </h4>
         <div className="flex items-center gap-1.5">
-          <Favicon src={faviconUrl} domain={link.domain} alt={link.domain} size={12} />
-          <span className="text-neutral-500 text-[11px] truncate">{source}</span>
+          <Favicon
+            src={faviconUrl}
+            domain={link.domain}
+            alt={link.domain}
+            size={12}
+          />
+          <span className="text-neutral-500 text-[11px] truncate">
+            {source}
+          </span>
         </div>
       </div>
     </a>
@@ -149,7 +161,7 @@ export function ExpandedSubcollection({
           {collection.name}
         </h3>
         <span className="text-neutral-600 text-xs shrink-0">
-          {t('common.link', { count: totalLinks })}
+          {t("common.link", { count: totalLinks })}
         </span>
         <svg
           width="14"
@@ -183,14 +195,16 @@ export function ExpandedSubcollection({
                 +{remaining}
               </div>
               <span className="text-neutral-500 text-xs group-hover:text-neutral-400 transition-colors">
-                {t('childCollections.seeAll')}
+                {t("childCollections.seeAll")}
               </span>
             </Link>
           )}
         </div>
       ) : (
         <div className="h-20 mx-4 mb-4 bg-surface-light rounded-xl flex items-center justify-center">
-          <p className="text-neutral-600 text-xs">{t('collectionPage.emptyLinks')}</p>
+          <p className="text-neutral-600 text-xs">
+            {t("collectionPage.emptyLinks")}
+          </p>
         </div>
       )}
     </motion.div>

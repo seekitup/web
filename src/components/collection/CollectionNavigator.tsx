@@ -1,8 +1,8 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AnimatePresence, motion } from 'framer-motion';
-import { NavigatorPill } from '@/components/collection/NavigatorPill';
-import type { NavigatorItem } from '@/components/collection/NavigatorPill';
+import { useRef, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { AnimatePresence, motion } from "framer-motion";
+import { NavigatorPill } from "@/components/collection/NavigatorPill";
+import type { NavigatorItem } from "@/components/collection/NavigatorPill";
 
 interface CollectionNavigatorProps {
   items: NavigatorItem[];
@@ -26,7 +26,7 @@ const pillVariants = {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: { type: 'spring' as const, stiffness: 500, damping: 30 },
+    transition: { type: "spring" as const, stiffness: 500, damping: 30 },
   },
 };
 
@@ -71,13 +71,11 @@ export function CollectionNavigator({
 
     // Calculate offset to center the active element
     const scrollLeft =
-      activeEl.offsetLeft -
-      containerRect.width / 2 +
-      activeRect.width / 2;
+      activeEl.offsetLeft - containerRect.width / 2 + activeRect.width / 2;
 
     container.scrollTo({
       left: scrollLeft,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   }, [activeItemId]);
 
@@ -99,7 +97,7 @@ export function CollectionNavigator({
           <motion.div
             key="compact-title"
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{
               height: { duration: 0.28, ease: [0.32, 0.72, 0, 1] },
@@ -117,7 +115,7 @@ export function CollectionNavigator({
                 </span>
                 {totalLinks > 0 && (
                   <span className="flex-shrink-0 text-xs md:text-sm font-medium text-neutral-500 leading-tight tabular-nums">
-                    {t('common.link', { count: totalLinks })}
+                    {t("common.link", { count: totalLinks })}
                   </span>
                 )}
               </div>
@@ -136,9 +134,9 @@ export function CollectionNavigator({
             className="overflow-x-auto scrollbar-hide"
             style={{
               maskImage:
-                'linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)',
+                "linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)",
               WebkitMaskImage:
-                'linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)',
+                "linear-gradient(to right, transparent 0%, black 40px, black calc(100% - 40px), transparent 100%)",
             }}
           >
             <motion.div

@@ -1,11 +1,14 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 interface AppBannerProps {
   dismissed: boolean;
   onDismiss: () => void;
 }
 
-export function AppBanner({ dismissed, onDismiss: _onDismiss }: AppBannerProps) {
+export function AppBanner({
+  dismissed,
+  onDismiss: _onDismiss,
+}: AppBannerProps) {
   const { t } = useTranslation();
   if (dismissed) return null;
 
@@ -15,20 +18,26 @@ export function AppBanner({ dismissed, onDismiss: _onDismiss }: AppBannerProps) 
         {/* Logo + Text */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 overflow-hidden">
-            <img src="/logo-square.png" alt="Seekitup" className="w-6 h-6 object-contain" />
+            <img
+              src="/logo-square.png"
+              alt="Seekitup"
+              className="w-6 h-6 object-contain"
+            />
           </div>
           <div className="min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{t('common.seekitup')}</p>
-            <p className="text-white/60 text-xs truncate">{t('appBanner.tagline')}</p>
+            <p className="text-white text-sm font-semibold truncate">
+              {t("common.seekitup")}
+            </p>
+            <p className="text-white/60 text-xs truncate">
+              {t("appBanner.tagline")}
+            </p>
           </div>
         </div>
 
         {/* CTA + Close */}
         <div className="flex items-center gap-2 shrink-0">
-          <span
-            className="bg-primary/40 text-black/60 text-sm font-semibold px-4 py-2 rounded-full transition-colors no-underline cursor-not-allowed"
-          >
-            {t('common.comingSoon')}
+          <span className="bg-primary/40 text-black/60 text-sm font-semibold px-4 py-2 rounded-full transition-colors no-underline cursor-not-allowed">
+            {t("common.comingSoon")}
           </span>
           {/* <button
             onClick={onDismiss}
