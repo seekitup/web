@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import type { LinkResponseDto } from '@/types/api';
-import { Favicon } from '@/components/ui/Favicon';
-import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import type { LinkResponseDto } from "@/types/api";
+import { Favicon } from "@/components/ui/Favicon";
+import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import {
   getLinkDisplayTitle,
   getLinkPrimaryMedia,
@@ -12,7 +12,7 @@ import {
   isYouTubeLink,
   extractYouTubeVideoId,
   getYouTubeThumbnailUrl,
-} from '@/lib/linkUtils';
+} from "@/lib/linkUtils";
 
 interface CompactLinkCardProps {
   link: LinkResponseDto;
@@ -29,7 +29,9 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
   const sourceText = getLinkSourceText(link);
   const price = formatLinkPrice(link.productPrice, link.productPriceCurrency);
 
-  const youtubeId = isYouTubeLink(link.url) ? extractYouTubeVideoId(link.url) : null;
+  const youtubeId = isYouTubeLink(link.url)
+    ? extractYouTubeVideoId(link.url)
+    : null;
   const thumbnailUrl = youtubeId
     ? getYouTubeThumbnailUrl(youtubeId)
     : primaryMedia?.url;
@@ -58,7 +60,7 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
               className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
+                imageLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
             {youtubeId && imageLoaded && (
@@ -87,8 +89,15 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
           </span>
         )}
         <div className="flex items-center gap-1.5 mt-auto">
-          <Favicon src={favicon?.url} domain={link.domain} alt={link.domain} size={12} />
-          <span className="text-neutral-500 text-xs truncate">{sourceText}</span>
+          <Favicon
+            src={favicon?.url}
+            domain={link.domain}
+            alt={link.domain}
+            size={12}
+          />
+          <span className="text-neutral-500 text-xs truncate">
+            {sourceText}
+          </span>
         </div>
       </div>
     </motion.a>

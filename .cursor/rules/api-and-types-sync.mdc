@@ -1,0 +1,19 @@
+---
+description: Keep API wrappers and DTO types synchronized
+globs: "{src/lib/api.ts,src/types/api.ts,src/hooks/**/*.ts,src/hooks/**/*.tsx}"
+alwaysApply: false
+---
+
+# API And Types Synchronization
+
+When API payload or endpoint behavior changes:
+
+- Update both `src/lib/api.ts` and `src/types/api.ts` in the same task.
+- Keep hook usage aligned with DTO changes (`src/hooks/*`).
+- Prefer additive, backward-safe contract evolution when possible.
+
+# Contract Safety
+
+- Do not rename/remove DTO fields used by existing UI without updating all consumers.
+- Keep endpoint paths/params aligned with documented contracts in `AGENTS.md`.
+- If backend contract is uncertain, flag it and ask instead of guessing.

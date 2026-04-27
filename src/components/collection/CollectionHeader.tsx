@@ -1,12 +1,17 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
-import type { CollectionLookupResponseDto } from '@/types/api';
+import { Avatar } from "@/components/ui/Avatar";
+import type { CollectionLookupResponseDto } from "@/types/api";
 
 interface CollectionHeaderProps {
   collection: CollectionLookupResponseDto;
+  titleRef?: (node: HTMLHeadingElement | null) => void;
 }
 
-export function CollectionHeader({ collection }: CollectionHeaderProps) {
+export function CollectionHeader({
+  collection,
+  titleRef,
+}: CollectionHeaderProps) {
   const { user, members } = collection;
 
   return (
@@ -17,7 +22,10 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
       className="px-4 pt-6 pb-4 md:pt-10 md:pb-6"
     >
       {/* Collection name */}
-      <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight mb-2">
+      <h1
+        ref={titleRef}
+        className="text-2xl md:text-4xl font-bold text-white leading-tight mb-2"
+      >
         {collection.name}
       </h1>
 
@@ -32,23 +40,14 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
       <div className="flex items-center gap-2 flex-wrap">
         {/* Owner avatar + username */}
         <div className="flex items-center gap-3">
-          {user.image?.url ? (
-            <img
-              src={user.image.url}
-              alt={user.username}
-              className="w-7 h-7 rounded-full object-cover ring-2 ring-neutral-700"
-            />
-          ) : (
-            <div className="w-7 h-7 rounded-full bg-neutral-700 flex items-center justify-center ring-2 ring-neutral-600">
-              <span className="text-xs font-semibold text-neutral-400">
-                {user.username.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
+          <Avatar user={user} size={28} className="ring-2 ring-neutral-700" />
           <div className="flex flex-col">
-            {[user.firstName, user.lastName].filter(Boolean).join(' ').trim() && (
+            {[user.firstName, user.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() && (
               <span className="text-white text-sm font-semibold leading-tight">
-                {[user.firstName, user.lastName].filter(Boolean).join(' ')}
+                {[user.firstName, user.lastName].filter(Boolean).join(" ")}
               </span>
             )}
             <span className="text-neutral-500 text-xs font-medium leading-tight">
@@ -62,21 +61,12 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
           <div className="flex items-center">
             <div className="flex -space-x-2">
               {members.slice(0, 4).map((member) => (
-                <div key={member.id} className="relative">
-                  {member.image?.url ? (
-                    <img
-                      src={member.image.url}
-                      alt={member.username}
-                      className="w-6 h-6 rounded-full object-cover ring-2 ring-background"
-                    />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-neutral-700 flex items-center justify-center ring-2 ring-background">
-                      <span className="text-[10px] font-semibold text-neutral-400">
-                        {member.username.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                <Avatar
+                  key={member.id}
+                  user={member}
+                  size={24}
+                  className="ring-2 ring-background"
+                />
               ))}
             </div>
             {members.length > 4 && (

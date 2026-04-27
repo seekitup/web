@@ -1,15 +1,15 @@
-import { memo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { memo, useState } from "react";
+import { motion } from "framer-motion";
 
 export type NavigatorItem =
   | {
-      kind: 'collection';
+      kind: "collection";
       id: string;
       name: string;
       previewImages: (string | undefined)[];
     }
   | {
-      kind: 'link';
+      kind: "link";
       id: string;
       title: string;
       thumbnailUrl: string | undefined;
@@ -42,7 +42,9 @@ function MiniImage({ src, alt }: { src: string | undefined; alt: string }) {
 
   return (
     <div className="w-full h-full bg-surface-light overflow-hidden">
-      {!loaded && <div className="absolute inset-0 animate-pulse bg-neutral-700" />}
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-neutral-700" />
+      )}
       <img
         src={src}
         alt={alt}
@@ -50,14 +52,20 @@ function MiniImage({ src, alt }: { src: string | undefined; alt: string }) {
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         className={`w-full h-full object-cover transition-opacity duration-200 ${
-          loaded ? 'opacity-100' : 'opacity-0'
+          loaded ? "opacity-100" : "opacity-0"
         }`}
       />
     </div>
   );
 }
 
-function CollectionPill({ item, isActive }: { item: Extract<NavigatorItem, { kind: 'collection' }>; isActive: boolean }) {
+function CollectionPill({
+  item,
+  isActive,
+}: {
+  item: Extract<NavigatorItem, { kind: "collection" }>;
+  isActive: boolean;
+}) {
   const images = item.previewImages.slice(0, 4);
   // Pad to 4 slots
   while (images.length < 4) images.push(undefined);
@@ -73,7 +81,7 @@ function CollectionPill({ item, isActive }: { item: Extract<NavigatorItem, { kin
       {/* Folder icon overlay */}
       <div
         className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center transition-colors duration-200 ${
-          isActive ? 'bg-primary' : 'bg-neutral-600'
+          isActive ? "bg-primary" : "bg-neutral-600"
         }`}
       >
         <svg
@@ -85,7 +93,7 @@ function CollectionPill({ item, isActive }: { item: Extract<NavigatorItem, { kin
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={isActive ? 'text-background' : 'text-neutral-300'}
+          className={isActive ? "text-background" : "text-neutral-300"}
         >
           <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
         </svg>
@@ -94,7 +102,13 @@ function CollectionPill({ item, isActive }: { item: Extract<NavigatorItem, { kin
   );
 }
 
-function FaviconBadge({ src, domain }: { src: string | undefined; domain: string }) {
+function FaviconBadge({
+  src,
+  domain,
+}: {
+  src: string | undefined;
+  domain: string;
+}) {
   const [error, setError] = useState(false);
   const fallbackSrc = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
   const imgSrc = error || !src ? fallbackSrc : src;
@@ -112,7 +126,11 @@ function FaviconBadge({ src, domain }: { src: string | undefined; domain: string
   );
 }
 
-function LinkPill({ item }: { item: Extract<NavigatorItem, { kind: 'link' }> }) {
+function LinkPill({
+  item,
+}: {
+  item: Extract<NavigatorItem, { kind: "link" }>;
+}) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
@@ -135,7 +153,9 @@ function LinkPill({ item }: { item: Extract<NavigatorItem, { kind: 'link' }> }) 
   return (
     <div className="relative w-full h-full">
       <div className="w-full h-full bg-surface-light rounded-xl overflow-hidden">
-        {!loaded && <div className="absolute inset-0 animate-pulse bg-neutral-700 rounded-xl" />}
+        {!loaded && (
+          <div className="absolute inset-0 animate-pulse bg-neutral-700 rounded-xl" />
+        )}
         <img
           src={item.thumbnailUrl}
           alt={item.title}
@@ -143,7 +163,7 @@ function LinkPill({ item }: { item: Extract<NavigatorItem, { kind: 'link' }> }) 
           onLoad={() => setLoaded(true)}
           onError={() => setError(true)}
           className={`w-full h-full object-cover transition-opacity duration-200 ${
-            loaded ? 'opacity-100' : 'opacity-0'
+            loaded ? "opacity-100" : "opacity-0"
           }`}
         />
       </div>
@@ -166,21 +186,22 @@ export const NavigatorPill = memo(function NavigatorPill({
         opacity: isActive ? 1 : 0.45,
       }}
       transition={{
-        scale: { type: 'spring', stiffness: 400, damping: 25 },
+        scale: { type: "spring", stiffness: 400, damping: 25 },
         opacity: { duration: 0.2 },
       }}
       whileTap={{ scale: 0.95 }}
       className={`
         relative shrink-0 w-11 h-11 rounded-xl overflow-visible cursor-pointer
         transition-shadow duration-300 focus:outline-none
-        ${isActive
-          ? 'ring-[2px] ring-primary'
-          : 'ring-0 shadow-none hover:opacity-70'
+        ${
+          isActive
+            ? "ring-[2px] ring-primary"
+            : "ring-0 shadow-none hover:opacity-70"
         }
       `}
-      aria-label={item.kind === 'collection' ? item.name : item.title}
+      aria-label={item.kind === "collection" ? item.name : item.title}
     >
-      {item.kind === 'collection' ? (
+      {item.kind === "collection" ? (
         <CollectionPill item={item} isActive={isActive} />
       ) : (
         <LinkPill item={item} />

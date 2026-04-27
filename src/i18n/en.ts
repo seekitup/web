@@ -1,14 +1,15 @@
 const en = {
   common: {
-    seekitup: "SeekItUp",
+    seekitup: "Seekitup",
     link_one: "{{count}} link",
     link_other: "{{count}} links",
+    comingSoon: "Coming soon",
   },
 
   downloadPage: {
-    metaTitle: "Download SeekItUp — Save & Share Links Beautifully",
+    metaTitle: "Download Seekitup — Save & Share Links Beautifully",
     metaDescription:
-      "SeekItUp helps you save, organize, and share your favorite links in beautiful collections. Download now for iOS and Android.",
+      "Seekitup helps you save, organize, and share your favorite links in beautiful collections. Download now for iOS and Android.",
     heading: "Save, organize &",
     headingHighlight: "share",
     headingEnd: "your favorite links",
@@ -17,23 +18,37 @@ const en = {
   },
 
   collectionPage: {
-    metaTitleNotFound: "Collection not found | SeekItUp",
-    metaTitle: "{{name}} by @{{username}} | SeekItUp",
-    metaDescriptionFallback: "Explore {{name}} on SeekItUp",
+    metaTitleNotFound: "Collection not found | Seekitup",
+    metaTitle: "{{name}} by @{{username}} | Seekitup",
+    metaDescriptionFallback: "Explore {{name}} on Seekitup",
     ogDescriptionFallback: "A collection by @{{username}}",
     errorTitle: "Collection not found",
     errorDescription:
       "This collection may have been removed, set to private, or doesn't exist.",
-    errorCta: "Download SeekItUp",
+    errorCta: "Download Seekitup",
     emptyLinks: "No links in this collection yet.",
   },
 
-  notFoundPage: {
-    metaTitle: "Page not found | SeekItUp",
-    title: "Page not found",
+  invitationPage: {
+    metaTitle: "{{inviter}} invited you to {{name}} | Seekitup",
+    title: "{{name}} invited you",
+    subtitle: "to collaborate on a collection",
+    collectionLabel: "Collection",
+    itemCount_one: "{{count}} link",
+    itemCount_other: "{{count}} links",
     description:
-      "The page you're looking for doesn't exist or has been moved.",
-    cta: "Download SeekItUp",
+      "Accept this invitation from the Seekitup app to start collaborating.",
+    alreadyAcceptedTitle: "You've already accepted this invitation",
+    alreadyAcceptedDescription:
+      "Open Seekitup on your device to view the collection.",
+    viewCollection: "View collection on the web",
+  },
+
+  notFoundPage: {
+    metaTitle: "Page not found | Seekitup",
+    title: "Page not found",
+    description: "The page you're looking for doesn't exist or has been moved.",
+    cta: "Download Seekitup",
   },
 
   appBanner: {
@@ -69,7 +84,7 @@ const en = {
     complete: "Complete",
     grid: "Grid",
   },
-}
+};
 
-export default en
-export type Translations = typeof en
+export default en;
+export type Translations = typeof en;

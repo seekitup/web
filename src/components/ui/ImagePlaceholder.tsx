@@ -1,9 +1,9 @@
 interface ImagePlaceholderProps {
-  size?: 'full' | 'compact';
+  size?: "full" | "compact";
 }
 
-export function ImagePlaceholder({ size = 'full' }: ImagePlaceholderProps) {
-  const logoSize = size === 'compact' ? 'w-8 h-8' : 'w-16 h-16';
+export function ImagePlaceholder({ size = "full" }: ImagePlaceholderProps) {
+  const logoSize = size === "compact" ? "w-8 h-8" : "w-16 h-16";
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-surface-light">

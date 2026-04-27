@@ -1,0 +1,28 @@
+---
+description: Core execution workflow and definition of done
+alwaysApply: true
+---
+
+# Core Workflow
+
+Follow this default sequence unless the user requests otherwise:
+
+1. Read `AGENTS.md` and start from the relevant "Read-First File Map" paths.
+2. Reuse existing project patterns before introducing new abstractions.
+3. Keep changes focused to the task; avoid unrelated file edits.
+4. Report assumptions and blockers explicitly instead of guessing.
+
+# Definition Of Done
+
+For substantive code changes, complete all of the following:
+
+- Run `npm run lint`.
+- Run `npm run build`.
+- Report command outcomes and any unresolved risks.
+- Include brief manual verification notes for affected flows when applicable.
+
+# Non-Negotiables
+
+- Do not silently change public behavior contracts described in `AGENTS.md`.
+- Prefer small, reviewable diffs scoped to one concern.
+- If requirements conflict, ask the user before proceeding with risky interpretation.

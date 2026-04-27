@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
  * Tracks which item (child collection or link) is most visible in the viewport.
@@ -14,7 +14,9 @@ export function useActiveItemTracker(itemIds: string[]) {
   // Timestamp until which observer changes are suppressed (smooth scroll guard)
   const forcedUntilRef = useRef<number>(0);
   const itemIdsRef = useRef(itemIds);
-  itemIdsRef.current = itemIds;
+  useEffect(() => {
+    itemIdsRef.current = itemIds;
+  });
 
   const flush = useCallback(() => {
     rafRef.current = null;
@@ -37,7 +39,7 @@ export function useActiveItemTracker(itemIds: string[]) {
         document.documentElement.scrollHeight - 80;
 
     if (atBottom) {
-      setObservedActiveId(ids[ids.length - 1]);
+      setObservedActiveId(ids[ids.length - 1] ?? null);
       return;
     }
 
@@ -71,7 +73,7 @@ export function useActiveItemTracker(itemIds: string[]) {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          const id = (entry.target as HTMLElement).dataset.itemId;
+          const id = (entry.target as HTMLElement).dataset["itemId"];
           if (id) {
             ratioMapRef.current.set(id, entry.intersectionRatio);
           }
@@ -84,14 +86,14 @@ export function useActiveItemTracker(itemIds: string[]) {
       {
         threshold: [0, 0.15, 0.25, 0.5, 0.75, 1.0],
         // Account for sticky navbar (h-14 = 56px) + navigator (~68px)
-        rootMargin: '-124px 0px 0px 0px',
+        rootMargin: "-124px 0px 0px 0px",
       },
     );
 
     observerRef.current = observer;
 
     // Observe all elements with data-item-id
-    const elements = document.querySelectorAll<HTMLElement>('[data-item-id]');
+    const elements = document.querySelectorAll<HTMLElement>("[data-item-id]");
     elements.forEach((el) => observer.observe(el));
 
     return () => {
@@ -109,7 +111,7 @@ export function useActiveItemTracker(itemIds: string[]) {
     if (!observer) return;
 
     // Re-query and observe any new elements
-    const elements = document.querySelectorAll<HTMLElement>('[data-item-id]');
+    const elements = document.querySelectorAll<HTMLElement>("[data-item-id]");
     elements.forEach((el) => observer.observe(el));
   }, [itemIds]);
 
@@ -120,19 +122,22 @@ export function useActiveItemTracker(itemIds: string[]) {
         rafRef.current = requestAnimationFrame(flush);
       }
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [flush]);
 
   // Derive visibleLinkId for backward compat
-  const visibleLinkId = activeItemId?.startsWith('link-')
-    ? parseInt(activeItemId.replace('link-', ''), 10)
+  const visibleLinkId = activeItemId?.startsWith("link-")
+    ? parseInt(activeItemId.replace("link-", ""), 10)
     : null;
 
   // Keep the old handleVisibilityChange interface working for LinkCard
-  const handleVisibilityChange = useCallback((_linkId: number, _inView: boolean) => {
-    // No-op: active tracking is now handled by the IntersectionObserver above
-  }, []);
+  const handleVisibilityChange = useCallback(
+    (_linkId: number, _inView: boolean) => {
+      // No-op: active tracking is now handled by the IntersectionObserver above
+    },
+    [],
+  );
 
   return { activeItemId, visibleLinkId, handleVisibilityChange, forceActive };
 }

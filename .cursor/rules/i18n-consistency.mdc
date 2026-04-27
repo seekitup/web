@@ -1,0 +1,19 @@
+---
+description: Enforce translation parity and i18n key consistency
+globs: "{src/i18n/**/*.ts,src/pages/**/*.tsx,src/components/**/*.tsx}"
+alwaysApply: false
+---
+
+# i18n Consistency
+
+When user-visible text changes:
+
+- Update `src/i18n/en.ts` and `src/i18n/es.ts` together.
+- Treat English keys as source-of-truth shape for translations.
+- Preserve existing key naming patterns and namespace structure.
+
+# Plurals And Safety
+
+- Use `_one` / `_other` pairs for pluralized content.
+- Avoid hardcoded UI copy in components when a translation key should exist.
+- If adding/removing keys, ensure both language files remain type-compatible.
