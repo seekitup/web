@@ -149,7 +149,7 @@ export function OrganizeCollectionForm({
             </span>
           ) : null}
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto pr-1 -mr-1">
           {isLoading ? (
             <div className="flex justify-center py-6">
               <Spinner size={20} />
