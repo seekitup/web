@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import type { CollectionResponseDto } from "@/types/api";
@@ -13,6 +13,8 @@ interface MiniCollectionRowProps {
   onClick: (collection: CollectionResponseDto) => void;
   highlightQuery?: string | undefined;
   className?: string | undefined;
+  /** Optional kebab/icon affordance rendered absolutely on the right edge. */
+  actionSlot?: ReactNode;
 }
 
 export const MiniCollectionRow = memo<MiniCollectionRowProps>(
@@ -21,18 +23,20 @@ export const MiniCollectionRow = memo<MiniCollectionRowProps>(
     onClick,
     highlightQuery,
     className,
+    actionSlot,
   }) {
     const { t } = useTranslation();
     const { user } = useAuth();
     const ownership = getCollectionOwnership(collection, user?.id);
 
     return (
+      <div className={clsx("relative", className)}>
       <button
         type="button"
         onClick={() => onClick(collection)}
         className={clsx(
           "group flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none rounded-lg cursor-pointer",
-          className,
+          actionSlot && "pr-12",
         )}
       >
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-neutral-800">
@@ -69,6 +73,12 @@ export const MiniCollectionRow = memo<MiniCollectionRowProps>(
           )}
         </div>
       </button>
+      {actionSlot ? (
+        <span className="absolute top-1/2 right-2 -translate-y-1/2 z-10">
+          {actionSlot}
+        </span>
+      ) : null}
+      </div>
     );
   },
 );

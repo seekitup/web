@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import clsx from "clsx";
 import type { LinkResponseDto } from "@/types/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +24,8 @@ interface MiniLinkRowProps {
   onClick: (link: LinkResponseDto) => void;
   highlightQuery?: string | undefined;
   className?: string | undefined;
+  /** Optional kebab/icon affordance rendered absolutely on the right edge. */
+  actionSlot?: ReactNode;
 }
 
 /**
@@ -36,6 +38,7 @@ export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
   onClick,
   highlightQuery,
   className,
+  actionSlot,
 }) {
   const { user } = useAuth();
   const title = getLinkDisplayTitle(link);
@@ -51,12 +54,13 @@ export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
   const overflow = collections.length - MAX_COLLECTIONS_SHOWN;
 
   return (
+    <div className={clsx("relative", className)}>
     <button
       type="button"
       onClick={() => onClick(link)}
       className={clsx(
         "group flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none rounded-lg cursor-pointer",
-        className,
+        actionSlot && "pr-12",
       )}
     >
       {/* Thumbnail with favicon overlay */}
@@ -116,6 +120,12 @@ export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
         </div>
       </div>
     </button>
+      {actionSlot ? (
+        <span className="absolute top-1/2 right-2 -translate-y-1/2 z-10">
+          {actionSlot}
+        </span>
+      ) : null}
+    </div>
   );
 });
 

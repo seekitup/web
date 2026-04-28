@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-export type OutletWidth = "narrow" | "wide";
+export type OutletWidth = "narrow" | "wide" | "full";
 
 export interface OutletWidthContextValue {
   width: OutletWidth;

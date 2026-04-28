@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
+import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import type { CollectionResponseDto } from "@/types/api";
@@ -14,12 +15,20 @@ interface GridCollectionCardProps {
   index: number;
   onClick: (collection: CollectionResponseDto) => void;
   highlightQuery?: string | undefined;
+  /** Optional kebab/icon affordance rendered absolutely in the top-right. */
+  actionSlot?: ReactNode;
 }
 
 const MAX_AVATARS = 3;
 
 export const GridCollectionCard = memo<GridCollectionCardProps>(
-  function GridCollectionCard({ collection, index, onClick, highlightQuery }) {
+  function GridCollectionCard({
+    collection,
+    index,
+    onClick,
+    highlightQuery,
+    actionSlot,
+  }) {
     const { t } = useTranslation();
     const { user } = useAuth();
     const ownership = getCollectionOwnership(collection, user?.id);
@@ -36,13 +45,17 @@ export const GridCollectionCard = memo<GridCollectionCardProps>(
       renderableMembers.length - (owner ? 1 : 0) - visibleMembers.length;
 
     return (
+      <div className="relative">
       <motion.button
         type="button"
         onClick={() => onClick(collection)}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.25) }}
-        className="group flex h-[110px] w-full flex-col justify-between rounded-xl bg-surface p-4 text-left transition-all duration-200 hover:scale-[1.01] hover:brightness-110 cursor-pointer"
+        className={clsx(
+          "group flex h-[110px] w-full flex-col justify-between rounded-xl bg-surface p-4 text-left transition-all duration-200 hover:scale-[1.01] hover:brightness-110 cursor-pointer",
+          actionSlot && "pr-12",
+        )}
       >
         <div className="flex items-start gap-2.5">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-neutral-800">
@@ -99,6 +112,10 @@ export const GridCollectionCard = memo<GridCollectionCardProps>(
           ) : null}
         </div>
       </motion.button>
+      {actionSlot ? (
+        <span className="absolute top-2 right-2 z-10">{actionSlot}</span>
+      ) : null}
+      </div>
     );
   },
 );

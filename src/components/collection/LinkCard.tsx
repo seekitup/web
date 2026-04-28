@@ -1,4 +1,11 @@
-import { useEffect, useRef, useCallback, useMemo, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
@@ -32,6 +39,8 @@ interface LinkCardProps {
   isVisible: boolean;
   onVisibilityChange: (linkId: number, inView: boolean) => void;
   itemId?: string;
+  /** Optional action affordance rendered floating in the top-right corner. */
+  actionSlot?: ReactNode;
 }
 
 // Clamp into [9:16, 16:9] so outlier media can't blow out the feed layout.
@@ -50,6 +59,7 @@ export function LinkCard({
   isVisible,
   onVisibilityChange,
   itemId,
+  actionSlot,
 }: LinkCardProps) {
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -411,10 +421,21 @@ export function LinkCard({
         ref={cardRef}
         data-item-id={itemId}
         {...motionProps}
-        className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group"
+        className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group relative"
       >
         {mediaSection}
         {contentSection}
+        {actionSlot ? (
+          <span
+            className="absolute top-2 right-2 z-10"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            {actionSlot}
+          </span>
+        ) : null}
       </motion.div>
     );
   }
@@ -427,10 +448,21 @@ export function LinkCard({
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group"
+      className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group relative"
     >
       {mediaSection}
       {contentSection}
+      {actionSlot ? (
+        <span
+          className="absolute top-2 right-2 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {actionSlot}
+        </span>
+      ) : null}
     </motion.a>
   );
 }

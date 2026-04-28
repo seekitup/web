@@ -56,6 +56,16 @@ export function AppLayout() {
 
 function OutletContainer() {
   const width = useOutletWidth();
+  // "full" lets the page own its own padding + width — used by pages that need
+  // an edge-to-edge hero (the authenticated collection view). The page is
+  // expected to apply `px-4 sm:px-6` to whichever inner blocks should have it.
+  if (width === "full") {
+    return (
+      <div className="w-full">
+        <Outlet />
+      </div>
+    );
+  }
   return (
     <div
       className={clsx(

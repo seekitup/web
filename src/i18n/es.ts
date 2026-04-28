@@ -620,6 +620,151 @@ const es: Translations = {
     errorTitle: "No pudimos cargar tus colecciones",
     errorBody: "Algo salió mal. Probá refrescar la página.",
   },
+
+  // ============================================================
+  // PÁGINA DE COLECCIÓN AUTENTICADA
+  // ============================================================
+
+  collectionHero: {
+    share: "Compartir",
+    addLink: "Agregar link",
+    openOptions: "Más opciones",
+    linkCount_one: "{{count}} link",
+    linkCount_other: "{{count}} links",
+    collectionCount_one: "{{count}} colección",
+    collectionCount_other: "{{count}} colecciones",
+    memberCount_one: "{{count}} miembro",
+    memberCount_other: "{{count}} miembros",
+  },
+
+  visibility: {
+    public: "Pública",
+    private: "Privada",
+    shared: "Compartida",
+    publicHint: "Cualquiera con el link puede ver esto.",
+    privateHint: "Solo vos y los editores pueden ver esto.",
+  },
+
+  roles: {
+    owner: "Dueño/a",
+    editor: "Editor/a",
+    viewer: "Lector/a",
+    member: "Miembro",
+  },
+
+  share: {
+    copiedToClipboard: "Link copiado al portapapeles",
+    failed: "No pudimos compartir — probá de nuevo",
+  },
+
+  relativeTime: {
+    justNow: "recién",
+    minutesAgo_one: "hace {{count}} minuto",
+    minutesAgo_other: "hace {{count}} minutos",
+    hoursAgo_one: "hace {{count}} hora",
+    hoursAgo_other: "hace {{count}} horas",
+    daysAgo_one: "hace {{count}} día",
+    daysAgo_other: "hace {{count}} días",
+  },
+
+  collectionOptions: {
+    duplicate: "Duplicar",
+    duplicateSuccess: "Colección duplicada",
+    duplicateError: "No pudimos duplicar",
+    manageParents: "Administrar colecciones padre",
+    rename: "Renombrar",
+    renameTitle: "Renombrar colección",
+    renamePlaceholder: "Nombre de la colección",
+    renameError: "No pudimos renombrar",
+    share: "Compartir",
+    shareError: "No pudimos compartir",
+    sharePrivateTitle: "Hacer pública para compartir",
+    sharePrivateMessage:
+      "Esta colección es privada. Para compartirla la haremos pública — cualquiera con el link va a poder verla.",
+    sharePrivateConfirm: "Hacer pública y compartir",
+    qrCode: "Código QR",
+    changeVisibility: "Cambiar visibilidad",
+    changeVisibilityPerInstance: "Solo dentro de esta colección padre",
+    visibilityModalTitle: "Visibilidad",
+    visibilityPerInstanceHint:
+      "Este cambio afecta solo cómo aparece esta colección dentro del padre actual.",
+    visibilityError: "No pudimos actualizar la visibilidad",
+    privateWithCollaboratorsTitle: "¿Quitar colaboradores?",
+    privateWithCollaboratorsMessage:
+      "Hacerla privada va a quitar a todos los colaboradores. Perderán acceso de inmediato.",
+    editEditors: "Administrar editores",
+    editEditorsTitle: "Administrar editores",
+    editEditorsError: "No pudimos actualizar el editor",
+    noEditorsYet: "Sin editores aún — invitá a alguien abajo.",
+    inviteEditorLabel: "Invitar por email",
+    invitePlaceholder: "nombre@ejemplo.com",
+    inviteButton: "Invitar",
+    inviteSuccess: "Invitación enviada",
+    inviteError: "No pudimos enviar la invitación",
+    removeMember: "Quitar",
+    shareableNote: "Quien invites va a usar este link: {{url}}",
+    editorsCreatedRelative: "Colección creada {{time}}",
+    select: "Seleccionar",
+    delete: "Eliminar colección",
+    deleteTitle: "¿Eliminar esta colección?",
+    deleteMessage:
+      "\"{{name}}\" se borrará permanentemente para todos los que tengan acceso.",
+    deleteContains: "Contiene {{contents}}.",
+    deleteSuccess: "Colección eliminada",
+    deleteError: "No pudimos eliminar",
+    leaveCollection: "Salir de la colección",
+    leaveTitle: "¿Salir de esta colección?",
+    leaveMessage:
+      "Vas a perder el acceso. El dueño/a puede volver a invitarte cuando quiera.",
+    leaveSuccess: "Saliste de la colección",
+    leaveError: "No pudimos hacerte salir",
+    parentError: "No pudimos actualizar los padres",
+    createdBy: "Creada por {{name}}",
+    sharedBy: "Compartida por {{name}}",
+    linkCount_one: "{{count}} link",
+    linkCount_other: "{{count}} links",
+    subcollectionCount_one: "{{count}} subcolección",
+    subcollectionCount_other: "{{count}} subcolecciones",
+  },
+
+  linkOptions: {
+    copyLink: "Copiar link",
+    linkCopied: "Link copiado",
+    copyError: "No pudimos copiar",
+    addToMyLinks: "Guardar en mis links",
+    addToMyLinksSuccess: "Guardado en tus links",
+    duplicateError: "No pudimos guardar",
+    manageCollections: "Administrar colecciones",
+    moveError: "No pudimos mover",
+    rename: "Renombrar",
+    renameTitle: "Renombrar link",
+    renamePlaceholder: "Título del link",
+    renameError: "No pudimos renombrar",
+    share: "Compartir",
+    shareError: "No pudimos compartir",
+    changeVisibility: "Cambiar visibilidad",
+    changeVisibilityPerInstance: "Solo dentro de esta colección",
+    visibilityModalTitle: "Visibilidad",
+    visibilityPerInstanceHint:
+      "Este cambio afecta solo cómo aparece este link dentro de la colección actual.",
+    visibilityError: "No pudimos actualizar la visibilidad",
+    delete: "Eliminar link",
+    deleteTitle: "¿Eliminar este link?",
+    deleteMessageNoCollections:
+      "\"{{title}}\" se borrará permanentemente de tu biblioteca.",
+    deleteMessageWithCollections:
+      "\"{{title}}\" se borrará permanentemente de tu biblioteca y de estas colecciones:",
+    deleteSuccess: "Link eliminado",
+    deleteError: "No pudimos eliminar",
+    removeFromCollection: "Quitar de esta colección",
+    removeFromCollectionTitle: "¿Quitar de la colección?",
+    removeFromCollectionMessage:
+      "\"{{title}}\" se quitará de \"{{collection}}\". El link sigue en tu biblioteca.",
+    removeFromCollectionSuccess: "Quitado de la colección",
+    removeFromCollectionError: "No pudimos quitar",
+    createdBy: "por {{name}}",
+    createdTimeAgo: "Creado {{time}}",
+  },
 };
 
 export default es;

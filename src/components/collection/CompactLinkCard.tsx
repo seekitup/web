@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
@@ -19,9 +20,16 @@ interface CompactLinkCardProps {
   link: LinkResponseDto;
   index: number;
   itemId?: string;
+  /** Optional action affordance rendered in the top-right (e.g. kebab). */
+  actionSlot?: ReactNode;
 }
 
-export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
+export function CompactLinkCard({
+  link,
+  index,
+  itemId,
+  actionSlot,
+}: CompactLinkCardProps) {
   const title = getLinkDisplayTitle(link);
   const primaryMedia = getLinkPrimaryMedia(link);
   const favicon = getLinkFavicon(link);
@@ -43,7 +51,7 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.25) }}
-      className="flex bg-surface rounded-xl overflow-hidden hover:scale-[1.01] hover:brightness-110 transition-all duration-200 no-underline group h-[90px]"
+      className="flex bg-surface rounded-xl overflow-hidden hover:scale-[1.01] hover:brightness-110 transition-all duration-200 no-underline group h-[90px] relative"
     >
       {/* Thumbnail */}
       <div className="w-[90px] h-[90px] shrink-0 relative overflow-hidden">
@@ -98,6 +106,17 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
           </span>
         </div>
       </div>
+      {actionSlot ? (
+        <span
+          className="absolute top-1.5 right-1.5 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {actionSlot}
+        </span>
+      ) : null}
     </motion.a>
   );
 }

@@ -618,6 +618,150 @@ const en = {
     errorTitle: "Couldn't load your collections",
     errorBody: "Something went wrong. Try refreshing.",
   },
+
+  // ============================================================
+  // AUTHENTICATED COLLECTION PAGE
+  // ============================================================
+
+  collectionHero: {
+    share: "Share",
+    addLink: "Add link",
+    openOptions: "More options",
+    linkCount_one: "{{count}} link",
+    linkCount_other: "{{count}} links",
+    collectionCount_one: "{{count}} collection",
+    collectionCount_other: "{{count}} collections",
+    memberCount_one: "{{count}} member",
+    memberCount_other: "{{count}} members",
+  },
+
+  visibility: {
+    public: "Public",
+    private: "Private",
+    shared: "Shared",
+    publicHint: "Anyone with the link can view this.",
+    privateHint: "Only you and editors can view this.",
+  },
+
+  roles: {
+    owner: "Owner",
+    editor: "Editor",
+    viewer: "Viewer",
+    member: "Member",
+  },
+
+  share: {
+    copiedToClipboard: "Link copied to clipboard",
+    failed: "Couldn't share — try again",
+  },
+
+  relativeTime: {
+    justNow: "just now",
+    minutesAgo_one: "{{count}} minute ago",
+    minutesAgo_other: "{{count}} minutes ago",
+    hoursAgo_one: "{{count}} hour ago",
+    hoursAgo_other: "{{count}} hours ago",
+    daysAgo_one: "{{count}} day ago",
+    daysAgo_other: "{{count}} days ago",
+  },
+
+  collectionOptions: {
+    duplicate: "Duplicate",
+    duplicateSuccess: "Collection duplicated",
+    duplicateError: "Couldn't duplicate",
+    manageParents: "Manage parent collections",
+    rename: "Rename",
+    renameTitle: "Rename collection",
+    renamePlaceholder: "Collection name",
+    renameError: "Couldn't rename",
+    share: "Share",
+    shareError: "Couldn't share",
+    sharePrivateTitle: "Make collection public to share",
+    sharePrivateMessage:
+      "This collection is currently private. To share it with others we'll make it public — anyone with the link will be able to view it.",
+    sharePrivateConfirm: "Make public & share",
+    qrCode: "QR code",
+    changeVisibility: "Change visibility",
+    changeVisibilityPerInstance: "Only inside this parent",
+    visibilityModalTitle: "Visibility",
+    visibilityPerInstanceHint:
+      "This change only affects how this collection appears inside the current parent.",
+    visibilityError: "Couldn't update visibility",
+    privateWithCollaboratorsTitle: "Remove collaborators?",
+    privateWithCollaboratorsMessage:
+      "Making this private will remove all collaborators. They will lose access immediately.",
+    editEditors: "Manage editors",
+    editEditorsTitle: "Manage editors",
+    editEditorsError: "Couldn't update editor",
+    noEditorsYet: "No editors yet — invite someone below.",
+    inviteEditorLabel: "Invite by email",
+    invitePlaceholder: "name@example.com",
+    inviteButton: "Invite",
+    inviteSuccess: "Invitation sent",
+    inviteError: "Couldn't send invite",
+    removeMember: "Remove",
+    shareableNote: "Anyone you invite will use this link: {{url}}",
+    editorsCreatedRelative: "Collection created {{time}}",
+    select: "Select",
+    delete: "Delete collection",
+    deleteTitle: "Delete this collection?",
+    deleteMessage:
+      "\"{{name}}\" will be permanently removed for everyone with access.",
+    deleteContains: "It contains {{contents}}.",
+    deleteSuccess: "Collection deleted",
+    deleteError: "Couldn't delete",
+    leaveCollection: "Leave collection",
+    leaveTitle: "Leave this collection?",
+    leaveMessage: "You'll lose access. The owner can re-invite you any time.",
+    leaveSuccess: "You left the collection",
+    leaveError: "Couldn't leave",
+    parentError: "Couldn't update parents",
+    createdBy: "Created by {{name}}",
+    sharedBy: "Shared by {{name}}",
+    linkCount_one: "{{count}} link",
+    linkCount_other: "{{count}} links",
+    subcollectionCount_one: "{{count}} subcollection",
+    subcollectionCount_other: "{{count}} subcollections",
+  },
+
+  linkOptions: {
+    copyLink: "Copy link",
+    linkCopied: "Link copied",
+    copyError: "Couldn't copy",
+    addToMyLinks: "Save to my links",
+    addToMyLinksSuccess: "Saved to your links",
+    duplicateError: "Couldn't save",
+    manageCollections: "Manage collections",
+    moveError: "Couldn't move",
+    rename: "Rename",
+    renameTitle: "Rename link",
+    renamePlaceholder: "Link title",
+    renameError: "Couldn't rename",
+    share: "Share",
+    shareError: "Couldn't share",
+    changeVisibility: "Change visibility",
+    changeVisibilityPerInstance: "Only inside this collection",
+    visibilityModalTitle: "Visibility",
+    visibilityPerInstanceHint:
+      "This change only affects how this link appears inside the current collection.",
+    visibilityError: "Couldn't update visibility",
+    delete: "Delete link",
+    deleteTitle: "Delete this link?",
+    deleteMessageNoCollections:
+      "\"{{title}}\" will be permanently removed from your library.",
+    deleteMessageWithCollections:
+      "\"{{title}}\" will be permanently removed from your library and from these collections:",
+    deleteSuccess: "Link deleted",
+    deleteError: "Couldn't delete",
+    removeFromCollection: "Remove from this collection",
+    removeFromCollectionTitle: "Remove from collection?",
+    removeFromCollectionMessage:
+      "\"{{title}}\" will be removed from \"{{collection}}\". The link itself stays in your library.",
+    removeFromCollectionSuccess: "Removed from collection",
+    removeFromCollectionError: "Couldn't remove",
+    createdBy: "by {{name}}",
+    createdTimeAgo: "Created {{time}}",
+  },
 };
 
 export default en;
