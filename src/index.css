@@ -33,6 +33,10 @@ html {
   scroll-behavior: smooth;
 }
 
+button {
+  cursor: pointer;
+}
+
 body {
   margin: 0;
   background-color: #121212;

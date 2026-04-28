@@ -125,6 +125,50 @@ export const getValidFiles = (
   return files.filter(isFileValid);
 };
 
+export type MediaType = "video" | "image" | "unknown";
+
+export const getMediaType = (file: FileResponseDto): MediaType => {
+  if (file.purpose === "video") return "video";
+  if (file.purpose === "image" || file.purpose === "og_image") return "image";
+  if (file.mimeType?.startsWith("video/")) return "video";
+  if (file.mimeType?.startsWith("image/")) return "image";
+  return "unknown";
+};
+
+export const shouldLoadThumbnail = (file: FileResponseDto): boolean =>
+  file.status === "analyzed";
+
+// Insert "/thumbnail/" before the filename and force .jpg.
+// e.g. https://x/media/abc/foo.mp4 -> https://x/media/abc/thumbnail/foo.jpg
+export const deriveThumbnailUrl = (url: string): string | null => {
+  if (!url) return null;
+  const lastSlash = url.lastIndexOf("/");
+  if (lastSlash === -1) return null;
+  const dir = url.substring(0, lastSlash);
+  const filename = url.substring(lastSlash + 1);
+  const dot = filename.lastIndexOf(".");
+  const stem = dot === -1 ? filename : filename.substring(0, dot);
+  return `${dir}/thumbnail/${stem}.jpg`;
+};
+
+export const getFileThumbnailUrl = (
+  file: FileResponseDto,
+): string | null => {
+  if (!shouldLoadThumbnail(file) || !file.url) return null;
+  return deriveThumbnailUrl(file.url);
+};
+
+// Videos first, then images. Mirrors mobile sortMediaFiles.
+export const sortMediaFiles = (
+  files: FileResponseDto[],
+): FileResponseDto[] => {
+  const videos = files.filter((f) => f.purpose === "video");
+  const images = files.filter(
+    (f) => f.purpose === "image" || f.purpose === "og_image",
+  );
+  return [...videos, ...images];
+};
+
 /**
  * Get the primary media file from a link.
  * Video takes priority over image on web, but we prefer images for static display.
@@ -152,6 +196,12 @@ export const getLinkMediaFiles = (link: LinkResponseDto): FileResponseDto[] => {
     (file) => file.purpose === "image" || file.purpose === "og_image",
   );
 };
+
+// Carousel feed for the complete view: videos sorted before images so a
+// video-only link still renders as a one-slide carousel of the video itself.
+export const getLinkCarouselFiles = (
+  link: LinkResponseDto,
+): FileResponseDto[] => sortMediaFiles(getValidFiles(link.files));
 
 export const getLinkFavicon = (
   link: LinkResponseDto,
@@ -221,15 +271,7 @@ export const getVideoThumbnailUrl = (
   file: FileResponseDto,
 ): string | undefined => {
   if (file.thumbnail) return file.thumbnail;
-  if (!file.url) return undefined;
-  const lastSlash = file.url.lastIndexOf("/");
-  if (lastSlash === -1) return undefined;
-  const dir = file.url.substring(0, lastSlash);
-  const filename = file.url.substring(lastSlash + 1);
-  const dotIndex = filename.lastIndexOf(".");
-  if (dotIndex === -1) return undefined;
-  const nameWithoutExt = filename.substring(0, dotIndex);
-  return `${dir}/thumbnail/${nameWithoutExt}.jpg`;
+  return deriveThumbnailUrl(file.url) ?? undefined;
 };
 
 /**

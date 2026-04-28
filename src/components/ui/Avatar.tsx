@@ -68,7 +68,10 @@ export function Avatar({ user, size = 28, className = "" }: AvatarProps) {
     if (user.firstName) {
       return user.firstName.slice(0, 2).toUpperCase();
     }
-    return user.username.slice(0, 2).toUpperCase();
+    if (user.username) {
+      return user.username.slice(0, 2).toUpperCase();
+    }
+    return "?";
   };
 
   const getNameForColor = (): string => {
@@ -78,7 +81,7 @@ export function Avatar({ user, size = 28, className = "" }: AvatarProps) {
     if (user.firstName) {
       return user.firstName;
     }
-    return user.username;
+    return user.username ?? `user-${user.id}`;
   };
 
   const initials = getInitials();

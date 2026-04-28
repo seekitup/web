@@ -1,29 +1,29 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
-import type { LinkResponseDto } from "@/types/api";
+import type { FileResponseDto, LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
 import { YouTubeEmbed } from "@/components/collection/YouTubeEmbed";
-import { VideoPlayer } from "@/components/collection/VideoPlayer";
 import { MercadoLibreHeroCard } from "@/components/collection/MercadoLibreHeroCard";
 import { LinkedInHeroCard } from "@/components/collection/LinkedInHeroCard";
+import { useVideoAudio } from "@/hooks/useVideoAudio";
 import {
   getLinkDisplayTitle,
-  getLinkPrimaryMedia,
-  getLinkPrimaryVideo,
+  getLinkCarouselFiles,
+  getLinkMediaFiles,
   getLinkFavicon,
   getLinkSourceText,
-  getLinkMediaFiles,
   formatLinkPrice,
   formatMeliPrice,
   isMercadoLibreProduct,
   isLinkedInProfile,
+  isVideoFile,
   isYouTubeLink,
   isYouTubeShort,
   extractYouTubeVideoId,
-  getVideoThumbnailUrl,
 } from "@/lib/linkUtils";
 
 interface LinkCardProps {
@@ -33,6 +33,16 @@ interface LinkCardProps {
   onVisibilityChange: (linkId: number, inView: boolean) => void;
   itemId?: string;
 }
+
+// Clamp into [9:16, 16:9] so outlier media can't blow out the feed layout.
+const ASPECT_RATIO_PORTRAIT = 9 / 16;
+const ASPECT_RATIO_LANDSCAPE = 16 / 9;
+const clampAspectRatio = (raw: number): number =>
+  Math.min(ASPECT_RATIO_LANDSCAPE, Math.max(ASPECT_RATIO_PORTRAIT, raw));
+
+type CarouselItem =
+  | { type: "hero"; key: string }
+  | { type: "media"; key: string; file: FileResponseDto };
 
 export function LinkCard({
   link,
@@ -44,9 +54,7 @@ export function LinkCard({
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
-  // Intersection observer — 50% threshold matching the app
   const { ref: cardRef, inView } = useInView({ threshold: 0.5 });
 
   useEffect(() => {
@@ -54,8 +62,6 @@ export function LinkCard({
   }, [inView, link.id, onVisibilityChange]);
 
   const title = getLinkDisplayTitle(link);
-  const primaryMedia = getLinkPrimaryMedia(link);
-  const primaryVideo = getLinkPrimaryVideo(link);
   const favicon = getLinkFavicon(link);
   const sourceText = getLinkSourceText(link);
   const isMeliProduct = isMercadoLibreProduct(link);
@@ -64,29 +70,68 @@ export function LinkCard({
     ? formatMeliPrice(link.productPrice, link.productPriceCurrency)
     : formatLinkPrice(link.productPrice, link.productPriceCurrency);
 
-  // YouTube
   const youtubeId = isYouTubeLink(link.url)
     ? extractYouTubeVideoId(link.url)
     : null;
   const isShort = youtubeId ? isYouTubeShort(link.url) : false;
 
-  // Get all media files for carousel
-  const allMediaFiles = getLinkMediaFiles(link);
-  const hasCarousel = !youtubeId && !primaryVideo && allMediaFiles.length > 1;
+  // Videos sorted before images so a video-only link still renders as a
+  // single-slide carousel of the video itself.
+  const carouselFiles = useMemo(() => getLinkCarouselFiles(link), [link]);
+  // Image-only files for the MercadoLibre hero card (which expects images).
+  const meliImageFiles = useMemo(() => getLinkMediaFiles(link), [link]);
+  const firstMediaFile = carouselFiles[0];
 
-  // Video thumbnail (poster)
-  const videoPoster = primaryVideo
-    ? getVideoThumbnailUrl(primaryVideo) || primaryMedia?.url
-    : undefined;
+  // Aspect-ratio fallback: when the first media's File record is missing
+  // width/height, the slide reports its natural size on load and we re-derive.
+  // Tracking the prior file id lets us reset measuredRatio when the carousel
+  // swaps in a different first file without the cascading-render lint error.
+  const firstMediaId = firstMediaFile?.id ?? null;
+  const [measuredFor, setMeasuredFor] = useState<number | null>(firstMediaId);
+  const [measuredRatio, setMeasuredRatio] = useState<number | null>(null);
+  if (measuredFor !== firstMediaId) {
+    setMeasuredFor(firstMediaId);
+    setMeasuredRatio(null);
+  }
+  const handleFirstMediaNaturalSize = useCallback(
+    (nw: number, nh: number) => {
+      if (nw && nh) setMeasuredRatio(nw / nh);
+    },
+    [],
+  );
 
-  // Track active carousel slide via scroll position
+  const aspectRatio = useMemo<string>(() => {
+    if (isShort) return `${ASPECT_RATIO_PORTRAIT}`;
+    if (youtubeId) return `${ASPECT_RATIO_LANDSCAPE}`;
+    if (firstMediaFile?.width && firstMediaFile?.height) {
+      return `${clampAspectRatio(firstMediaFile.width / firstMediaFile.height)}`;
+    }
+    if (measuredRatio) return `${clampAspectRatio(measuredRatio)}`;
+    return `${ASPECT_RATIO_LANDSCAPE}`;
+  }, [isShort, youtubeId, firstMediaFile, measuredRatio]);
+
+  // Build carousel items. MercadoLibre product gets a hero slide prepended.
+  const carouselItems = useMemo<CarouselItem[]>(() => {
+    const items: CarouselItem[] = [];
+    if (isMeliProduct) items.push({ type: "hero", key: "meli-hero" });
+    for (const file of carouselFiles.slice(0, 10)) {
+      items.push({
+        type: "media",
+        key: file.id.toString(),
+        file,
+      });
+    }
+    return items;
+  }, [isMeliProduct, carouselFiles]);
+
+  const totalSlides = carouselItems.length;
+
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const slideWidth = el.offsetWidth;
     if (slideWidth === 0) return;
-    const newIndex = Math.round(el.scrollLeft / slideWidth);
-    setActiveIndex(newIndex);
+    setActiveIndex(Math.round(el.scrollLeft / slideWidth));
   }, []);
 
   const scrollTo = useCallback((idx: number) => {
@@ -95,36 +140,18 @@ export function LinkCard({
     el.scrollTo({ left: idx * el.offsetWidth, behavior: "smooth" });
   }, []);
 
-  const handleImageLoad = useCallback((key: string) => {
-    setLoadedImages((prev) => new Set(prev).add(key));
-  }, []);
+  // Active media item (skipping the hero slide if present).
+  const activeItem = carouselItems[activeIndex];
+  const activeIsVideo =
+    activeItem?.type === "media" && isVideoFile(activeItem.file);
 
-  // Build carousel items
-  const carouselItems: Array<{
-    type: "hero" | "media";
-    key: string;
-    url?: string;
-  }> = [];
-  if (hasCarousel || isMeliProduct) {
-    if (isMeliProduct) {
-      carouselItems.push({ type: "hero", key: "meli-hero" });
-    }
-    for (const file of allMediaFiles.slice(0, 10)) {
-      carouselItems.push({
-        type: "media",
-        key: file.id.toString(),
-        url: file.url,
-      });
-    }
-  }
-
-  const totalSlides = carouselItems.length;
-
-  // Determine aspect ratio for carousel/single image
-  const aspectRatio =
-    primaryMedia?.width && primaryMedia?.height
-      ? `${primaryMedia.width} / ${primaryMedia.height}`
-      : "16 / 9";
+  // Single-card mute toggle, shown only when the active slide is a video.
+  const { isMuted, toggleMute } = useVideoAudio();
+  const handleMuteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMute();
+  };
 
   const motionProps = {
     initial: { opacity: 0, y: 20 },
@@ -132,13 +159,19 @@ export function LinkCard({
     transition: { duration: 0.35, delay: Math.min(index * 0.05, 0.3) },
   };
 
-  // --- Image Section ---
-  const imageSection = (
+  // --- Image / media section ---
+  const mediaSection = (
     <div className="relative w-full bg-neutral-800 overflow-hidden">
       {isLinkedIn ? (
         <LinkedInHeroCard link={link} />
+      ) : youtubeId ? (
+        <YouTubeEmbed
+          videoId={youtubeId}
+          isVisible={isVisible}
+          isShort={isShort}
+          title={title}
+        />
       ) : totalSlides > 1 ? (
-        // Carousel
         <>
           <div
             ref={scrollRef}
@@ -146,37 +179,36 @@ export function LinkCard({
             className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {carouselItems.map((item) =>
+            {carouselItems.map((item, i) =>
               item.type === "hero" ? (
                 <div
                   key={item.key}
                   className="w-full shrink-0 snap-center"
                   style={{ aspectRatio }}
                 >
-                  <MercadoLibreHeroCard mediaFiles={allMediaFiles} />
+                  <MercadoLibreHeroCard mediaFiles={meliImageFiles} />
                 </div>
               ) : (
                 <div
                   key={item.key}
-                  className="w-full shrink-0 snap-center relative"
+                  className="w-full shrink-0 snap-center"
                   style={{ aspectRatio }}
                 >
-                  {!loadedImages.has(item.key) && (
-                    <div className="absolute inset-0 animate-pulse bg-neutral-700" />
-                  )}
-                  <img
-                    src={item.url}
-                    alt=""
-                    loading="lazy"
-                    onLoad={() => handleImageLoad(item.key)}
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                      loadedImages.has(item.key) ? "opacity-100" : "opacity-0"
-                    }`}
+                  <ProgressiveMedia
+                    file={item.file}
+                    width="100%"
+                    aspectRatio={aspectRatio}
+                    isVisible={isVisible && i === activeIndex}
+                    alt={title}
+                    {...(i === (isMeliProduct ? 1 : 0)
+                      ? { onNaturalSize: handleFirstMediaNaturalSize }
+                      : {})}
                   />
                 </div>
               ),
             )}
           </div>
+
           {/* Left caret */}
           {activeIndex > 0 && (
             <button
@@ -241,47 +273,71 @@ export function LinkCard({
             ))}
           </div>
         </>
-      ) : youtubeId ? (
-        <YouTubeEmbed
-          videoId={youtubeId}
-          isVisible={isVisible}
-          isShort={isShort}
-          title={title}
-        />
-      ) : primaryVideo ? (
-        <VideoPlayer
-          src={primaryVideo.url}
-          poster={videoPoster}
-          isVisible={isVisible}
-          aspectRatio={aspectRatio}
-        />
-      ) : primaryMedia?.url ? (
-        <>
-          {!loadedImages.has("single") && (
-            <div className="w-full aspect-video animate-pulse bg-neutral-700" />
-          )}
-          <img
-            src={primaryMedia.url}
+      ) : firstMediaFile ? (
+        <div style={{ aspectRatio }}>
+          <ProgressiveMedia
+            file={firstMediaFile}
+            width="100%"
+            aspectRatio={aspectRatio}
+            isVisible={isVisible}
+            onNaturalSize={handleFirstMediaNaturalSize}
             alt={title}
-            loading="lazy"
-            onLoad={() => handleImageLoad("single")}
-            className={`w-full object-cover transition-opacity duration-300 ${
-              loadedImages.has("single")
-                ? "opacity-100"
-                : "opacity-0 absolute inset-0"
-            }`}
-            style={{ aspectRatio, maxHeight: "400px" }}
           />
-        </>
+        </div>
       ) : (
         <div className="w-full aspect-video">
           <ImagePlaceholder size="full" />
         </div>
       )}
+
+      {/* Mute toggle: shown when the active slide is a playing video. */}
+      {activeIsVideo ? (
+        <button
+          type="button"
+          onClick={handleMuteClick}
+          aria-label={isMuted ? "Unmute video" : "Mute video"}
+          aria-pressed={!isMuted}
+          className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/75 flex items-center justify-center transition-colors"
+        >
+          {isMuted ? (
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <line x1="23" y1="9" x2="17" y2="15" />
+              <line x1="17" y1="9" x2="23" y2="15" />
+            </svg>
+          ) : (
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+          )}
+        </button>
+      ) : null}
     </div>
   );
 
-  // --- Content Section ---
+  // --- Content section ---
   const contentSection = (
     <div className="p-4">
       {isMeliProduct ? (
@@ -357,13 +413,12 @@ export function LinkCard({
         {...motionProps}
         className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group"
       >
-        {imageSection}
+        {mediaSection}
         {contentSection}
       </motion.div>
     );
   }
 
-  // Non-YouTube cards: anchor wrapper for navigation
   return (
     <motion.a
       ref={cardRef}
@@ -374,7 +429,7 @@ export function LinkCard({
       rel="noopener noreferrer"
       className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group"
     >
-      {imageSection}
+      {mediaSection}
       {contentSection}
     </motion.a>
   );

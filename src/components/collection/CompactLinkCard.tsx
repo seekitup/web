@@ -1,14 +1,15 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
 import {
   getLinkDisplayTitle,
   getLinkPrimaryMedia,
   getLinkFavicon,
   getLinkSourceText,
   formatLinkPrice,
+  isVideoFile,
   isYouTubeLink,
   extractYouTubeVideoId,
   getYouTubeThumbnailUrl,
@@ -21,8 +22,6 @@ interface CompactLinkCardProps {
 }
 
 export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-
   const title = getLinkDisplayTitle(link);
   const primaryMedia = getLinkPrimaryMedia(link);
   const favicon = getLinkFavicon(link);
@@ -32,9 +31,8 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
   const youtubeId = isYouTubeLink(link.url)
     ? extractYouTubeVideoId(link.url)
     : null;
-  const thumbnailUrl = youtubeId
-    ? getYouTubeThumbnailUrl(youtubeId)
-    : primaryMedia?.url;
+  const showPlayBadge =
+    !!youtubeId || (!!primaryMedia && isVideoFile(primaryMedia));
 
   return (
     <motion.a
@@ -48,34 +46,34 @@ export function CompactLinkCard({ link, index, itemId }: CompactLinkCardProps) {
       className="flex bg-surface rounded-xl overflow-hidden hover:scale-[1.01] hover:brightness-110 transition-all duration-200 no-underline group h-[90px]"
     >
       {/* Thumbnail */}
-      <div className="w-[90px] h-[90px] shrink-0 bg-neutral-800 relative overflow-hidden">
-        {thumbnailUrl ? (
-          <>
-            {!imageLoaded && (
-              <div className="absolute inset-0 animate-pulse bg-neutral-700" />
-            )}
-            <img
-              src={thumbnailUrl}
-              alt={title}
-              loading="lazy"
-              onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-            />
-            {youtubeId && imageLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                    <polygon points="8,5 20,12 8,19" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </>
+      <div className="w-[90px] h-[90px] shrink-0 relative overflow-hidden">
+        {youtubeId ? (
+          <img
+            src={getYouTubeThumbnailUrl(youtubeId)}
+            alt={title}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : primaryMedia ? (
+          <ProgressiveMedia
+            file={primaryMedia}
+            width={90}
+            height={90}
+            thumbnailOnly
+            alt={title}
+          />
         ) : (
           <ImagePlaceholder size="compact" />
         )}
+        {showPlayBadge ? (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                <polygon points="8,5 20,12 8,19" />
+              </svg>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Content */}
