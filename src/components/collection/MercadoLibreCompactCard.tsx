@@ -2,6 +2,11 @@ import { useCallback, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import {
   formatMeliPrice,
   getLinkDisplayTitle,
@@ -24,11 +29,17 @@ interface MercadoLibreCompactCardProps {
  * `formatMeliPrice` formatter shared with `LinkCard`.
  */
 export function MercadoLibreCompactCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: MercadoLibreCompactCardProps) {
+  // Defensive polling: in practice the dispatcher's `productPrice > 0` gate
+  // means this variant only mounts post-scrape, so `isPending` will almost
+  // always be false. Kept for parity and to handle direct mounts.
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Card-level navigation. Wrapper is a div (not <a>) so inner buttons
@@ -80,7 +91,9 @@ export function MercadoLibreCompactCard({
     >
       {/* Product image cell — white backdrop so transparent product cutouts read */}
       <div className="w-[90px] h-[90px] shrink-0 relative overflow-hidden bg-white">
-        {primaryImage ? (
+        {isPending ? (
+          <PendingMediaSkeleton className="absolute inset-0" size="small" />
+        ) : primaryImage ? (
           <>
             {!imageLoaded && (
               <div className="absolute inset-0 animate-pulse bg-neutral-200" />

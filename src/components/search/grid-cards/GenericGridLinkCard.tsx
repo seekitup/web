@@ -3,7 +3,12 @@ import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
 import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import {
   extractYouTubeVideoId,
   formatLinkPrice,
@@ -29,11 +34,14 @@ interface GenericGridLinkCardProps {
  * any row when paired with `auto-rows-fr` on the grid.
  */
 export function GenericGridLinkCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: GenericGridLinkCardProps) {
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const title = getLinkDisplayTitle(link);
   const sourceText = getLinkSourceText(link);
   const favicon = getLinkFavicon(link);
@@ -44,7 +52,8 @@ export function GenericGridLinkCard({
     ? extractYouTubeVideoId(link.url)
     : null;
   const showPlayBadge =
-    !!youtubeId || (!!primaryMedia && isVideoFile(primaryMedia));
+    !isPending &&
+    (!!youtubeId || (!!primaryMedia && isVideoFile(primaryMedia)));
 
   return (
     <motion.a
@@ -60,7 +69,9 @@ export function GenericGridLinkCard({
     >
       {/* Hero */}
       <div className="relative flex-1 overflow-hidden bg-surface-light">
-        {youtubeId ? (
+        {isPending ? (
+          <PendingMediaSkeleton className="absolute inset-0" />
+        ) : youtubeId ? (
           <img
             src={getYouTubeThumbnailUrl(youtubeId)}
             alt={title}
@@ -81,8 +92,11 @@ export function GenericGridLinkCard({
           <ImagePlaceholder size="full" />
         )}
 
-        {/* Bottom legibility scrim */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/40 to-transparent" />
+        {/* Bottom legibility scrim — hidden during pending so it doesn't
+            stack a dark gradient over the skeleton. */}
+        {!isPending ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/40 to-transparent" />
+        ) : null}
 
         {showPlayBadge ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -100,7 +114,7 @@ export function GenericGridLinkCard({
           </div>
         ) : null}
 
-        {price ? (
+        {!isPending && price ? (
           <span className="absolute bottom-2 left-2 rounded-full bg-primary px-2 py-1 text-xs font-bold text-black shadow-lg">
             {price}
           </span>

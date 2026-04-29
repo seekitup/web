@@ -682,6 +682,7 @@ const es: Translations = {
     duplicateSuccess: "Colección duplicada",
     duplicateError: "No pudimos duplicar",
     manageParents: "Administrar colecciones padre",
+    manageParentsError: "No pudimos actualizar las colecciones padre",
     rename: "Renombrar",
     renameTitle: "Renombrar colección",
     renamePlaceholder: "Nombre de la colección",

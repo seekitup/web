@@ -2,6 +2,11 @@ import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import {
   getLinkFavicon,
   getLinkedInProfilePicture,
@@ -21,11 +26,17 @@ interface LinkedInCompactCardProps {
  * for `platformPostTitle` (headline) / clean `linkedin.com/...` URL.
  */
 export function LinkedInCompactCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: LinkedInCompactCardProps) {
+  // Idempotent re-subscribe: if reached via the dispatcher this is a no-op
+  // (same query key already populated); if rendered directly elsewhere it
+  // wires up polling for free.
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const [avatarLoaded, setAvatarLoaded] = useState(false);
 
   const profilePic = getLinkedInProfilePicture(link);
@@ -58,7 +69,12 @@ export function LinkedInCompactCard({
         style={{ background: "linear-gradient(135deg, #0077B5, #004182)" }}
       >
         <div className="w-[58px] h-[58px] rounded-full overflow-hidden bg-[#E7E2DC] border-2 border-white/90 relative">
-          {profilePic?.url ? (
+          {isPending ? (
+            <PendingMediaSkeleton
+              className="absolute inset-0 rounded-full"
+              size="small"
+            />
+          ) : profilePic?.url ? (
             <>
               {!avatarLoaded && (
                 <div className="absolute inset-0 animate-pulse bg-neutral-300" />

@@ -606,6 +606,9 @@ function CollectionCardWrapper({
         ) {
           return;
         }
+        if ((e.target as Element | null)?.closest("button")) {
+          return;
+        }
         onCollectionClick(collection);
       }}
     >

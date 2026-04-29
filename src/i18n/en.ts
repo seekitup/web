@@ -680,6 +680,7 @@ const en = {
     duplicateSuccess: "Collection duplicated",
     duplicateError: "Couldn't duplicate",
     manageParents: "Manage parent collections",
+    manageParentsError: "Couldn't update parent collections",
     rename: "Rename",
     renameTitle: "Rename collection",
     renamePlaceholder: "Collection name",

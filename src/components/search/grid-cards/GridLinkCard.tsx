@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { LinkResponseDto } from "@/types/api";
+import { usePendingLinkPolling } from "@/hooks/usePendingLinkPolling";
 import {
   isLinkedInProfile,
   isMercadoLibreProduct,
@@ -23,11 +24,16 @@ export interface GridLinkCardProps {
  * shape of `CompactLinkCard` so it can drop into the same wrappers.
  */
 export function GridLinkCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: GridLinkCardProps) {
+  // Polling at the dispatcher so dispatch decisions react to fields that
+  // arrive after scrape (Meli `productPrice`, LinkedIn `platformUserName`,
+  // etc.) without each variant having to re-poll.
+  const link = usePendingLinkPolling(linkProp);
+
   if (isLinkedInProfile(link)) {
     return (
       <LinkedInGridCard

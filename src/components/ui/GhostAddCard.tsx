@@ -132,7 +132,7 @@ export const GhostAddCard = memo<GhostAddCardProps>(function GhostAddCard({
         transition={{ duration: 0.2 }}
         className={clsx(
           BASE,
-          "flex h-[90px] flex-col items-center justify-center gap-1.5 rounded-xl",
+          "flex h-full min-h-[140px] flex-col items-center justify-center gap-1.5 rounded-xl",
           "hover:scale-[1.01]",
           className,
         )}

@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Favicon } from "@/components/ui/Favicon";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
+import { CollectionPickerDialog } from "@/components/create/CollectionPickerDialog";
 import {
   CopyIcon,
   PlusIcon,
@@ -65,6 +66,7 @@ type SubModal =
   | { kind: "none" }
   | { kind: "rename" }
   | { kind: "visibility" }
+  | { kind: "manage-collections" }
   | { kind: "delete-confirm" }
   | { kind: "remove-confirm" };
 
@@ -200,7 +202,7 @@ export function LinkOptionsModal({
   return (
     <>
       <Modal
-        isOpen={isOpen && sub.kind === "none"}
+        isOpen={isOpen && sub.kind === "none" && !updateLink.isPending}
         onClose={onClose}
         showClose
         titleAlign="left"
@@ -274,11 +276,7 @@ export function LinkOptionsModal({
             <OptionRow
               icon={<FolderIcon />}
               label={t("linkOptions.manageCollections")}
-              onClick={() => {
-                // Defers to the existing CollectionPickerDialog flow under
-                // /create/. Wiring is a small follow-up; flagged in the plan.
-                toast(t("common.comingSoon"));
-              }}
+              onClick={() => setSub({ kind: "manage-collections" })}
             />
           ) : null}
           {showRename ? (
@@ -347,6 +345,7 @@ export function LinkOptionsModal({
             });
             onUpdated?.();
             setSub({ kind: "none" });
+            onClose();
           } catch (err) {
             toast.error(
               getApiErrorMessage(err, t("linkOptions.renameError")),
@@ -367,6 +366,7 @@ export function LinkOptionsModal({
                 link.effectiveVisibility ?? link.visibility;
               if (newVisibility === currentEffective) {
                 setSub({ kind: "none" });
+                onClose();
                 return;
               }
               await updateLinkVisibility.mutateAsync({
@@ -377,6 +377,7 @@ export function LinkOptionsModal({
             } else {
               if (newVisibility === link.visibility) {
                 setSub({ kind: "none" });
+                onClose();
                 return;
               }
               await updateLink.mutateAsync({
@@ -386,6 +387,7 @@ export function LinkOptionsModal({
             }
             onUpdated?.();
             setSub({ kind: "none" });
+            onClose();
           } catch (err) {
             toast.error(
               getApiErrorMessage(err, t("linkOptions.visibilityError")),
@@ -393,6 +395,35 @@ export function LinkOptionsModal({
           }
         }}
         isPending={updateLink.isPending || updateLinkVisibility.isPending}
+      />
+
+      <CollectionPickerDialog
+        isOpen={isOpen && sub.kind === "manage-collections"}
+        onClose={() => setSub({ kind: "none" })}
+        currentCollectionIds={link.collections?.map((c) => c.id) ?? []}
+        onSelectionsChange={async (added, removed) => {
+          if (added.length === 0 && removed.length === 0) {
+            onClose();
+            return;
+          }
+          try {
+            const currentIds = link.collections?.map((c) => c.id) ?? [];
+            const nextIds = [
+              ...currentIds.filter((id) => !removed.includes(id)),
+              ...added,
+            ];
+            await updateLink.mutateAsync({
+              id: link.id,
+              data: { collectionIds: nextIds },
+            });
+            onUpdated?.();
+            onClose();
+          } catch (err) {
+            toast.error(
+              getApiErrorMessage(err, t("linkOptions.moveError")),
+            );
+          }
+        }}
       />
 
       <ConfirmModal

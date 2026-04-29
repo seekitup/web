@@ -12,10 +12,15 @@ import { motion } from "framer-motion";
 import type { FileResponseDto, LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
 import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
 import { YouTubeEmbed } from "@/components/collection/YouTubeEmbed";
 import { MercadoLibreHeroCard } from "@/components/collection/MercadoLibreHeroCard";
 import { LinkedInHeroCard } from "@/components/collection/LinkedInHeroCard";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import { useVideoAudio } from "@/hooks/useVideoAudio";
 import {
   getLinkDisplayTitle,
@@ -54,7 +59,7 @@ type CarouselItem =
   | { type: "media"; key: string; file: FileResponseDto };
 
 export function LinkCard({
-  link,
+  link: linkProp,
   index,
   isVisible,
   onVisibilityChange,
@@ -64,6 +69,12 @@ export function LinkCard({
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Polls every 5s while the link is still pending/analyzing — falls through
+  // to the prop once analyzed. Drives both the skeleton swap and the
+  // dispatcher decisions below (e.g. Meli flips on once productPrice arrives).
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
 
   const { ref: cardRef, inView } = useInView({ threshold: 0.5 });
 
@@ -203,9 +214,15 @@ export function LinkCard({
   };
 
   // --- Image / media section ---
+  // While the link is pending we short-circuit the entire dispatch ladder
+  // (LinkedIn / YouTube / carousel / single-image / placeholder) and render a
+  // single skeleton in the hero slot. Avoids half-rendered platform variants
+  // (LinkedIn profile with empty avatar, etc.) leaking through.
   const mediaSection = (
     <div className="relative w-full bg-neutral-800 overflow-hidden">
-      {isLinkedIn ? (
+      {isPending ? (
+        <PendingMediaSkeleton className="w-full aspect-video" />
+      ) : isLinkedIn ? (
         <LinkedInHeroCard link={link} />
       ) : youtubeId ? (
         <YouTubeEmbed
@@ -334,7 +351,7 @@ export function LinkCard({
       )}
 
       {/* Mute toggle: shown when the active slide is a playing video. */}
-      {activeIsVideo ? (
+      {!isPending && activeIsVideo ? (
         <button
           type="button"
           onClick={handleMuteClick}

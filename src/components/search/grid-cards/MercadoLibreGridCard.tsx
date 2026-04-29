@@ -2,6 +2,11 @@ import { useCallback, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import {
   formatMeliPrice,
   getLinkDisplayTitle,
@@ -24,11 +29,17 @@ interface MercadoLibreGridCardProps {
  * other grid cards.
  */
 export function MercadoLibreGridCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: MercadoLibreGridCardProps) {
+  // Defensive polling. The dispatcher's `productPrice > 0` gate means this
+  // variant typically only mounts post-scrape, but we keep parity for direct
+  // mounts and future dispatch tweaks.
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const openLink = useCallback(() => {
@@ -83,7 +94,9 @@ export function MercadoLibreGridCard({
     >
       {/* Product hero — white backdrop, contained product image */}
       <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-white p-4">
-        {primaryImage?.url ? (
+        {isPending ? (
+          <PendingMediaSkeleton className="absolute inset-0" />
+        ) : primaryImage?.url ? (
           <>
             {!imageLoaded ? (
               <div className="absolute inset-0 animate-pulse bg-neutral-200" />
@@ -112,7 +125,7 @@ export function MercadoLibreGridCard({
         </span>
 
         {/* Premium price chip — the visual centerpiece */}
-        {price ? (
+        {!isPending && price ? (
           <span className="absolute bottom-3 right-3 rounded-lg bg-gradient-to-br from-[#FFE600] to-[#FFD000] px-3 py-1.5 text-sm font-extrabold text-[#2E3172] shadow-lg shadow-yellow-500/30 ring-1 ring-black/5">
             {price}
           </span>

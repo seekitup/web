@@ -8,6 +8,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { QRCodeModal } from "@/components/ui/QRCodeModal";
 import { TextField } from "@/components/ui/TextField";
 import { Avatar } from "@/components/ui/Avatar";
+import { CollectionPickerDialog } from "@/components/create/CollectionPickerDialog";
 import {
   CopyIcon,
   CollectionIcon,
@@ -26,6 +27,8 @@ import { useDeleteCollection } from "@/hooks/useDeleteCollection";
 import { useDuplicateCollection } from "@/hooks/useDuplicateCollection";
 import { useLeaveCollection } from "@/hooks/useLeaveCollection";
 import { useUpdateCollectionParentVisibility } from "@/hooks/useUpdateCollectionParentVisibility";
+import { useAddParent } from "@/hooks/useAddParent";
+import { useRemoveParent } from "@/hooks/useRemoveParent";
 import { useRemoveMember } from "@/hooks/useRemoveMember";
 import { useInviteMember } from "@/hooks/useInviteMember";
 import { useCollectionMembers } from "@/hooks/useCollectionMembers";
@@ -68,6 +71,7 @@ type SubModal =
   | { kind: "none" }
   | { kind: "rename" }
   | { kind: "visibility" }
+  | { kind: "manage-parents" }
   | { kind: "share-private-confirm" }
   | { kind: "downgrade-with-collaborators-confirm" }
   | { kind: "delete-confirm" }
@@ -95,6 +99,8 @@ export function CollectionOptionsModal({
   const duplicateCollection = useDuplicateCollection();
   const leaveCollection = useLeaveCollection();
   const updateParentVisibility = useUpdateCollectionParentVisibility();
+  const addParent = useAddParent();
+  const removeParent = useRemoveParent();
 
   // Reset sub-modal when the modal closes / collection changes — synchronous
   // setState here is intentional: the sub-modal stack is purely UI state
@@ -157,10 +163,11 @@ export function CollectionOptionsModal({
       setSub({ kind: "none" });
       // Re-derive the share URL with whatever owner info we now have
       await shareUrl(getCollectionShareUrl(collection), collection.name);
+      onClose();
     } catch (err) {
       toast.error(getApiErrorMessage(err, t("collectionOptions.shareError")));
     }
-  }, [collection, onUpdated, t, updateCollection]);
+  }, [collection, onClose, onUpdated, t, updateCollection]);
 
   const handleQR = useCallback(() => {
     if (!collection) return;
@@ -231,7 +238,13 @@ export function CollectionOptionsModal({
   return (
     <>
       <Modal
-        isOpen={isOpen && sub.kind === "none"}
+        isOpen={
+          isOpen &&
+          sub.kind === "none" &&
+          !updateCollection.isPending &&
+          !addParent.isPending &&
+          !removeParent.isPending
+        }
         onClose={onClose}
         showClose
         titleAlign="left"
@@ -273,12 +286,7 @@ export function CollectionOptionsModal({
             <OptionRow
               icon={<CollectionIcon />}
               label={t("collectionOptions.manageParents")}
-              onClick={() => {
-                // The picker dialog lives in /create/ and is wired up in the
-                // create flow. For now, route the user to the create modal
-                // by emitting a toast hint — full integration is a follow-up.
-                toast(t("common.comingSoon"));
-              }}
+              onClick={() => setSub({ kind: "manage-parents" })}
             />
           ) : null}
           {canRename ? (
@@ -363,6 +371,7 @@ export function CollectionOptionsModal({
             });
             onUpdated?.();
             setSub({ kind: "none" });
+            onClose();
           } catch (err) {
             toast.error(
               getApiErrorMessage(err, t("collectionOptions.renameError")),
@@ -386,6 +395,7 @@ export function CollectionOptionsModal({
               });
               onUpdated?.();
               setSub({ kind: "none" });
+              onClose();
             } catch (err) {
               toast.error(
                 getApiErrorMessage(
@@ -398,6 +408,7 @@ export function CollectionOptionsModal({
           }
           if (newVisibility === collection.visibility) {
             setSub({ kind: "none" });
+            onClose();
             return;
           }
           const hasNonOwnerCollabs =
@@ -416,6 +427,7 @@ export function CollectionOptionsModal({
             });
             onUpdated?.();
             setSub({ kind: "none" });
+            onClose();
           } catch (err) {
             toast.error(
               getApiErrorMessage(err, t("collectionOptions.visibilityError")),
@@ -425,6 +437,44 @@ export function CollectionOptionsModal({
         isPending={
           updateCollection.isPending || updateParentVisibility.isPending
         }
+      />
+
+      <CollectionPickerDialog
+        isOpen={isOpen && sub.kind === "manage-parents"}
+        onClose={() => setSub({ kind: "none" })}
+        currentCollectionIds={collection.parentCollectionIds ?? []}
+        excludeCollectionIds={[collection.id]}
+        onSelectionsChange={async (added, removed) => {
+          if (added.length === 0 && removed.length === 0) {
+            onClose();
+            return;
+          }
+          try {
+            await Promise.all([
+              ...added.map((parentCollectionId) =>
+                addParent.mutateAsync({
+                  collectionId: collection.id,
+                  parentCollectionId,
+                }),
+              ),
+              ...removed.map((parentId) =>
+                removeParent.mutateAsync({
+                  collectionId: collection.id,
+                  parentId,
+                }),
+              ),
+            ]);
+            onUpdated?.();
+            onClose();
+          } catch (err) {
+            toast.error(
+              getApiErrorMessage(
+                err,
+                t("collectionOptions.manageParentsError"),
+              ),
+            );
+          }
+        }}
       />
 
       <ConfirmModal
@@ -449,6 +499,7 @@ export function CollectionOptionsModal({
             });
             onUpdated?.();
             setSub({ kind: "none" });
+            onClose();
           } catch (err) {
             toast.error(
               getApiErrorMessage(err, t("collectionOptions.visibilityError")),

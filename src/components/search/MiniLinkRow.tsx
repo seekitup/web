@@ -2,10 +2,15 @@ import { memo, type ReactNode } from "react";
 import clsx from "clsx";
 import type { LinkResponseDto } from "@/types/api";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import { Favicon } from "@/components/ui/Favicon";
 import { HighlightedText } from "@/components/ui/HighlightedText";
 import { OwnershipChip } from "@/components/create/OwnershipChip";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
 import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
 import {
   getLinkDisplayTitle,
@@ -34,12 +39,15 @@ interface MiniLinkRowProps {
  * row of "where this lives" pills (collection names, max 3 + overflow).
  */
 export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
-  link,
+  link: linkProp,
   onClick,
   highlightQuery,
   className,
   actionSlot,
 }) {
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const { user } = useAuth();
   const title = getLinkDisplayTitle(link);
   const primaryMedia = getLinkPrimaryMedia(link);
@@ -63,9 +71,16 @@ export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
         actionSlot && "pr-12",
       )}
     >
-      {/* Thumbnail with favicon overlay */}
+      {/* Thumbnail with favicon overlay. While pending, the thumb is the
+          skeleton and the favicon overlay is hidden (favicon may not have
+          been scraped yet either). */}
       <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg">
-        {youtubeId ? (
+        {isPending ? (
+          <PendingMediaSkeleton
+            className="absolute inset-0 rounded-lg"
+            size="small"
+          />
+        ) : youtubeId ? (
           <img
             src={getYouTubeThumbnailUrl(youtubeId)}
             alt=""
@@ -83,7 +98,7 @@ export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
         ) : (
           <ImagePlaceholder size="compact" />
         )}
-        {favicon?.url ? (
+        {!isPending && favicon?.url ? (
           <span className="absolute bottom-0.5 right-0.5">
             <Favicon
               src={favicon.url}

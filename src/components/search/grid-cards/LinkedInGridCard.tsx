@@ -1,7 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
 import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import {
   getLinkDisplayTitle,
   getLinkedInCoverImage,
@@ -23,11 +28,14 @@ interface LinkedInGridCardProps {
  * of the other grid cards so heights stay aligned.
  */
 export function LinkedInGridCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: LinkedInGridCardProps) {
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const [avatarLoaded, setAvatarLoaded] = useState(false);
 
   const profilePic = getLinkedInProfilePicture(link);
@@ -56,9 +64,12 @@ export function LinkedInGridCard({
       className="group relative aspect-square flex flex-col overflow-hidden rounded-2xl bg-surface border border-white/5 no-underline transition-all duration-300 hover:-translate-y-0.5 hover:border-[#0077B5]/40 hover:shadow-[0_8px_24px_-8px_rgba(0,119,181,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       {/* Cover banner — real cover image when available, branded blue gradient
-          with a soft radial highlight as the fallback. */}
+          with a soft radial highlight as the fallback. While pending, the
+          banner is the skeleton (logo badge stays — domain is known immediately). */}
       <div className="relative h-32 shrink-0 overflow-hidden bg-gradient-to-br from-[#0077B5] to-[#004182]">
-        {coverImage ? (
+        {isPending ? (
+          <PendingMediaSkeleton className="absolute inset-0" />
+        ) : coverImage ? (
           <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
             <ProgressiveMedia
               file={coverImage}
@@ -91,7 +102,12 @@ export function LinkedInGridCard({
 
       {/* Avatar — centered, large, overlapping the banner */}
       <div className="relative z-10 mx-auto -mt-12 size-24 shrink-0 overflow-hidden rounded-full bg-[#E7E2DC] ring-4 ring-surface">
-        {profilePic?.url ? (
+        {isPending ? (
+          <PendingMediaSkeleton
+            className="absolute inset-0 rounded-full"
+            size="small"
+          />
+        ) : profilePic?.url ? (
           <>
             {!avatarLoaded ? (
               <div className="absolute inset-0 animate-pulse bg-neutral-300" />

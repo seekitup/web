@@ -3,7 +3,12 @@ import { motion } from "framer-motion";
 import type { LinkResponseDto } from "@/types/api";
 import { Favicon } from "@/components/ui/Favicon";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { PendingMediaSkeleton } from "@/components/ui/PendingMediaSkeleton";
 import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
+import {
+  isLinkPendingMedia,
+  usePendingLinkPolling,
+} from "@/hooks/usePendingLinkPolling";
 import {
   getLinkDisplayTitle,
   getLinkPrimaryMedia,
@@ -33,13 +38,19 @@ interface CompactLinkCardProps {
  * their dedicated compact variants (mirrors how `LinkCard` dispatches to the
  * full hero cards in Complete mode), and falls back to a generic 90×90
  * thumbnail + text layout for everything else.
+ *
+ * The dispatcher polls `usePendingLinkPolling` so dispatch decisions react to
+ * fields that arrive after scrape (e.g. `productPrice` flips a Meli link from
+ * the generic variant to the Meli variant).
  */
 export function CompactLinkCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: CompactLinkCardProps) {
+  const link = usePendingLinkPolling(linkProp);
+
   if (isLinkedInProfile(link)) {
     return (
       <LinkedInCompactCard
@@ -71,11 +82,17 @@ export function CompactLinkCard({
 }
 
 function GenericCompactLinkCard({
-  link,
+  link: linkProp,
   index,
   itemId,
   actionSlot,
 }: CompactLinkCardProps) {
+  // Idempotent re-subscribe so this variant always reads the polled link even
+  // when reached by callers that didn't pass through the dispatcher. React
+  // Query dedupes on `linkKeys.byId(id)`, so no extra request.
+  const link = usePendingLinkPolling(linkProp);
+  const isPending = isLinkPendingMedia(link);
+
   const title = getLinkDisplayTitle(link);
   const primaryMedia = getLinkPrimaryMedia(link);
   const favicon = getLinkFavicon(link);
@@ -86,7 +103,8 @@ function GenericCompactLinkCard({
     ? extractYouTubeVideoId(link.url)
     : null;
   const showPlayBadge =
-    !!youtubeId || (!!primaryMedia && isVideoFile(primaryMedia));
+    !isPending &&
+    (!!youtubeId || (!!primaryMedia && isVideoFile(primaryMedia)));
 
   return (
     <motion.a
@@ -101,7 +119,9 @@ function GenericCompactLinkCard({
     >
       {/* Thumbnail */}
       <div className="w-[90px] h-[90px] shrink-0 relative overflow-hidden">
-        {youtubeId ? (
+        {isPending ? (
+          <PendingMediaSkeleton className="w-full h-full" size="small" />
+        ) : youtubeId ? (
           <img
             src={getYouTubeThumbnailUrl(youtubeId)}
             alt={title}

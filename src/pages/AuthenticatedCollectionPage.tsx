@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -140,6 +140,7 @@ export function AuthenticatedCollectionPage() {
   }>();
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get("invite");
+  const navigate = useNavigate();
 
   const [mode, setMode] = useResultsViewMode("complete");
   const [collectionOptionsOpen, setCollectionOptionsOpen] = useState(false);
@@ -469,6 +470,9 @@ export function AuthenticatedCollectionPage() {
             ]}
             onLinkClick={(link) =>
               window.open(link.url, "_blank", "noopener")
+            }
+            onCollectionClick={(c) =>
+              navigate(`/${c.user.username}/${c.slug}`)
             }
             renderLinkActions={(link) => (
               <EntityActionKebab

@@ -396,6 +396,11 @@ export const linksApi = {
     return response.data;
   },
 
+  getById: async (id: number): Promise<LinkResponseDto> => {
+    const response = await apiClient.get(`/api/v1/links/${id}`);
+    return response.data;
+  },
+
   create: async (data: CreateLinkDto): Promise<LinkResponseDto> => {
     const response = await apiClient.post("/api/v1/links", data);
     return response.data;
