@@ -31,7 +31,7 @@ export function InfiniteScrollSentinel({
   className,
   root,
 }: InfiniteScrollSentinelProps) {
-  const { ref, inView } = useInView({ threshold: 0, rootMargin, root });
+  const { ref, inView } = useInView({ threshold: 0, rootMargin, root: root ?? null });
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

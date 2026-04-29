@@ -403,7 +403,7 @@ export interface CollectionResponseDto {
 export interface CollectionsQueryParams extends PaginationParams {
   filter?: "all" | "my" | "invited" | "pending" | "saved";
   collectionId?: number | null | "null";
-  name?: string;
+  name?: string | undefined;
   sortBy?: "createdAt" | "lastViewedAt";
 }
 
@@ -485,7 +485,7 @@ export interface LinksQueryParams extends PaginationParams {
   collectionId?: number;
   visibility?: "public" | "private";
   sortBy?: "createdAt" | "lastViewedAt";
-  search?: string;
+  search?: string | undefined;
 }
 
 // ============================================================

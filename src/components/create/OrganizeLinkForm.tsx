@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
@@ -34,7 +34,7 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const debouncedSearch = useDebouncedValue(search.trim(), 300);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
 
   const {
     items: links,
@@ -156,7 +156,7 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
           ) : null}
         </div>
         <div
-          ref={scrollRef}
+          ref={setScrollEl}
           className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto pr-1 -mr-1"
         >
           {isLoading ? (
@@ -181,7 +181,7 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
                 fetchNextPage={fetchNextPage}
-                root={scrollRef.current}
+                root={scrollEl}
                 rootMargin="120px 0px"
                 className="flex justify-center py-3"
               />

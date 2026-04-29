@@ -23,5 +23,6 @@ export function useIsCollectionDetail(): boolean {
   const { pathname } = useLocation();
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length !== 2) return false;
-  return !RESERVED_FIRST_SEGMENTS.has(segments[0].toLowerCase());
+  const first = segments[0];
+  return first !== undefined && !RESERVED_FIRST_SEGMENTS.has(first.toLowerCase());
 }
