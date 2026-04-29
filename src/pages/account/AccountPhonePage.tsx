@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { BackButton } from "@/components/auth/BackButton";
-import { AccountPageHeader } from "@/components/account/SettingsSection";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { CountryCodePicker } from "@/components/account/CountryCodePicker";
 import { COUNTRIES, type Country } from "@/components/account/countries";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,13 +74,13 @@ export function AccountPhonePage() {
       <Helmet>
         <title>{t("accountPhoneScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <AccountPageHeader
+      <PageHeader
+        leading={<BackButton to="/account" />}
         title={t("accountPhoneScreen.title")}
         subtitle={t("accountPhoneScreen.subtitle")}
       />
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-5" noValidate>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-text-dim">
             {t("accountPhoneScreen.label")}

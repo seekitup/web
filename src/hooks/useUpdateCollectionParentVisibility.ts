@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 import type { UpdateCollectionLinkVisibilityDto } from "@/types/api";
 
 interface Vars {
@@ -22,13 +23,8 @@ export function useUpdateCollectionParentVisibility() {
         data,
       ),
     onSuccess: (_, { parentCollectionId, childCollectionId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["collection", parentCollectionId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["collection", childCollectionId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      invalidateCollection(queryClient, parentCollectionId);
+      invalidateCollection(queryClient, childCollectionId);
     },
   });
 }

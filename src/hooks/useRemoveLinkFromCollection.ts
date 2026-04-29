@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { linkKeys, searchKeys } from "@/lib/queryKeys";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 
 interface Vars {
   collectionId: number;
@@ -16,10 +18,9 @@ export function useRemoveLinkFromCollection() {
     mutationFn: ({ collectionId, linkId }) =>
       api.collections.removeLinkFromCollection(collectionId, linkId),
     onSuccess: (_, { collectionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
-      queryClient.invalidateQueries({ queryKey: ["links"] });
-      queryClient.invalidateQueries({ queryKey: ["search"] });
+      invalidateCollection(queryClient, collectionId);
+      queryClient.invalidateQueries({ queryKey: linkKeys.all() });
+      queryClient.invalidateQueries({ queryKey: searchKeys.all() });
     },
   });
 }

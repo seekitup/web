@@ -46,7 +46,7 @@ export function MiniCollection({
           {collection.totalLinks} {collection.totalLinks === 1 ? "link" : "links"}
         </span>
       </span>
-      {ownership !== "own" ? <OwnershipChip ownership={ownership} /> : null}
+      {ownership && ownership !== "own" ? <OwnershipChip ownership={ownership} /> : null}
       <span
         aria-hidden
         className={clsx(

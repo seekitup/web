@@ -1,10 +1,10 @@
 /**
  * Collection-specific permission utilities.
  *
- * Mirrors `seekitup-app/app/utils/collectionPermissions.ts` exactly. Only field
- * accesses are adapted to the web DTO shape: members are flat
- * `CollectionRoleUserDto` records (no nested `.role` / `.userId`), where
- * `.id` is the user id and `.roleName` carries the role.
+ * Mirrors `seekitup-app/app/utils/collectionPermissions.ts`. Members and
+ * `userRole` follow the API shape: `CollectionRoleUserDto.id` is the
+ * role_user row id, `.userId` is the user id, `.role.name` carries the role,
+ * and `.acceptedAt` is null/undefined for pending invitations.
  */
 
 import type {
@@ -16,8 +16,7 @@ import type { EntityRole } from "./permissions";
 
 /**
  * Minimal user shape we can guarantee from any owner source — covers what
- * Avatar / display-name helpers actually consume. Both `UserResponseDto` and
- * `CollectionRoleUserDto` satisfy this.
+ * Avatar / display-name helpers actually consume.
  */
 export interface OwnerLike {
   id: number;
@@ -38,9 +37,9 @@ export function isCollectionOwner(
   }
 
   const ownerMember = collection.members?.find(
-    (m: CollectionRoleUserDto) => m.roleName === "owner",
+    (m: CollectionRoleUserDto) => m.role?.name === "owner",
   );
-  if (ownerMember?.id === userId) {
+  if (ownerMember?.userId === userId) {
     return true;
   }
 
@@ -66,16 +65,17 @@ export function getCollectionOwner(
   }
 
   const ownerMember = collection.members?.find(
-    (m) => m.roleName === "owner",
+    (m) => m.role?.name === "owner",
   );
-  if (ownerMember) {
+  if (ownerMember?.user) {
+    const u = ownerMember.user;
     return {
-      id: ownerMember.id,
-      username: ownerMember.username,
-      firstName: ownerMember.firstName,
-      lastName: ownerMember.lastName,
-      image: ownerMember.image
-        ? { id: ownerMember.image.id, url: ownerMember.image.url }
+      id: u.id,
+      username: u.username,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      image: u.image
+        ? { id: u.image.id, url: u.image.url }
         : null,
     };
   }
@@ -93,13 +93,13 @@ export function getCollectionUserRole(
     return "owner";
   }
 
-  if (collection.userRole?.roleName) {
-    return collection.userRole.roleName as EntityRole;
+  if (collection.userRole?.role?.name) {
+    return collection.userRole.role.name as EntityRole;
   }
 
-  const memberEntry = collection.members?.find((m) => m.id === userId);
-  if (memberEntry?.roleName) {
-    return memberEntry.roleName as EntityRole;
+  const memberEntry = collection.members?.find((m) => m.userId === userId);
+  if (memberEntry?.role?.name) {
+    return memberEntry.role.name as EntityRole;
   }
 
   return null;

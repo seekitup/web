@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 import type { CollectionMemberResponseDto, InviteMemberDto } from "@/types/api";
 
 interface InviteMemberVars {
@@ -13,9 +14,7 @@ export function useInviteMember() {
     mutationFn: ({ collectionId, data }) =>
       api.collections.inviteMember(collectionId, data),
     onSuccess: (_, { collectionId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["collection", collectionId],
-      });
+      invalidateCollection(queryClient, collectionId);
     },
   });
 }

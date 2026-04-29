@@ -77,7 +77,52 @@ export const GhostAddCard = memo<GhostAddCardProps>(function GhostAddCard({
   }
 
   if (variant === "grid") {
-    const height = type === "collection" ? "h-[110px]" : "h-[90px]";
+    if (type === "collection") {
+      return (
+        <motion.button
+          type="button"
+          onClick={onClick}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+          className={clsx(
+            BASE,
+            "flex h-full min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl p-6 overflow-hidden",
+            "hover:scale-[1.005]",
+            className,
+          )}
+        >
+          <span
+            aria-hidden
+            className={clsx(
+              "pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300",
+              "group-hover:opacity-[0.12]",
+              "bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_65%)]",
+            )}
+          />
+          <span
+            className={clsx(
+              "relative flex h-12 w-12 items-center justify-center rounded-full",
+              "bg-primary/10 text-primary transition-all duration-200",
+              "group-hover:bg-primary/20 group-hover:scale-110",
+            )}
+          >
+            <PlusIcon size={22} />
+          </span>
+          <span className="relative flex flex-col items-center gap-1">
+            <span className="text-[14px] font-semibold text-text group-hover:text-primary transition-colors">
+              {label}
+            </span>
+            {caption ? (
+              <span className="text-[12px] text-text-dim/70 text-center max-w-[220px] line-clamp-2 group-hover:text-primary/70 transition-colors">
+                {caption}
+              </span>
+            ) : null}
+          </span>
+        </motion.button>
+      );
+    }
+
     return (
       <motion.button
         type="button"
@@ -87,8 +132,7 @@ export const GhostAddCard = memo<GhostAddCardProps>(function GhostAddCard({
         transition={{ duration: 0.2 }}
         className={clsx(
           BASE,
-          "flex flex-col items-center justify-center gap-1.5 rounded-xl",
-          height,
+          "flex h-[90px] flex-col items-center justify-center gap-1.5 rounded-xl",
           "hover:scale-[1.01]",
           className,
         )}

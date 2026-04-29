@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
@@ -6,9 +6,12 @@ import { TextField } from "@/components/ui/TextField";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/hooks/useAuth";
 import { useCollections } from "@/hooks/useCollections";
+import { useInfiniteCollections } from "@/hooks/useInfiniteCollections";
 import { useAddParent } from "@/hooks/useAddParent";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { canAddContent } from "@/lib/collectionPermissions";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { InfiniteScrollSentinel } from "@/components/list/InfiniteScrollSentinel";
 import { CollectionPickerDialog } from "./CollectionPickerDialog";
 import { CollectionPickerTrigger } from "./CollectionPickerTrigger";
 import { MiniCollection } from "./MiniCollection";
@@ -16,6 +19,11 @@ import { MiniCollection } from "./MiniCollection";
 interface OrganizeCollectionFormProps {
   onSuccess: () => void;
 }
+
+// Auto-fetch the next page if the post-permission-filter list is at or below
+// this length and more pages exist — keeps the visible list from looking
+// empty when many items in a page get filtered out by `canAddContent`.
+const MIN_VISIBLE_BEFORE_AUTO_FETCH = 5;
 
 export function OrganizeCollectionForm({
   onSuccess,
@@ -28,20 +36,49 @@ export function OrganizeCollectionForm({
   const [targetIds, setTargetIds] = useState<number[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const { data: collections = [], isLoading } = useCollections({
+  const debouncedSearch = useDebouncedValue(search.trim(), 300);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const {
+    items: collections,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteCollections({
+    filter: "all",
+    name: debouncedSearch || undefined,
+  });
+  // Bounded second query feeds CollectionPickerTrigger's selected-name lookup —
+  // the trigger needs to resolve names regardless of what the paginated list
+  // happens to have loaded. Matches the pattern in OrganizeLinkForm.
+  const { data: triggerCollections = [] } = useCollections({
     filter: "all",
     limit: 100,
   });
   const addParent = useAddParent();
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return collections.filter((c) => {
-      if (!canAddContent(c, user?.id)) return false;
-      if (!q) return true;
-      return c.name.toLowerCase().includes(q);
-    });
-  }, [collections, search, user?.id]);
+  const filtered = useMemo(
+    () => collections.filter((c) => canAddContent(c, user?.id)),
+    [collections, user?.id],
+  );
+
+  useEffect(() => {
+    if (
+      filtered.length <= MIN_VISIBLE_BEFORE_AUTO_FETCH &&
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !isLoading
+    ) {
+      fetchNextPage();
+    }
+  }, [
+    filtered.length,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    fetchNextPage,
+  ]);
 
   const toggleSource = (id: number) => {
     setSourceIds((prev) => {
@@ -149,24 +186,37 @@ export function OrganizeCollectionForm({
             </span>
           ) : null}
         </div>
-        <div className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto pr-1 -mr-1">
+        <div
+          ref={scrollRef}
+          className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto pr-1 -mr-1"
+        >
           {isLoading ? (
             <div className="flex justify-center py-6">
               <Spinner size={20} />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : filtered.length === 0 && !hasNextPage ? (
             <p className="py-6 text-center text-[14px] text-text-dim">
               {t("organizeCollectionForm.noCollections")}
             </p>
           ) : (
-            filtered.map((c) => (
-              <MiniCollection
-                key={c.id}
-                collection={c}
-                isSelected={sourceIds.has(c.id)}
-                onPress={() => toggleSource(c.id)}
+            <>
+              {filtered.map((c) => (
+                <MiniCollection
+                  key={c.id}
+                  collection={c}
+                  isSelected={sourceIds.has(c.id)}
+                  onPress={() => toggleSource(c.id)}
+                />
+              ))}
+              <InfiniteScrollSentinel
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                fetchNextPage={fetchNextPage}
+                root={scrollRef.current}
+                rootMargin="120px 0px"
+                className="flex justify-center py-3"
               />
-            ))
+            </>
           )}
         </div>
 
@@ -174,7 +224,7 @@ export function OrganizeCollectionForm({
           <CollectionPickerTrigger
             label={t("organizeCollectionForm.addToCollection")}
             selectedCollectionIds={targetIds}
-            collections={collections}
+            collections={triggerCollections}
             onPress={() => setPickerOpen(true)}
             onClear={() => setTargetIds([])}
           />

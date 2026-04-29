@@ -30,6 +30,8 @@ interface ModalProps {
   headerLeft?: ReactNode;
   /** Optional below-title slot inside the header (e.g. tabs). */
   headerExtra?: ReactNode;
+  /** Optional pinned footer below the scrollable body (e.g. action bar). */
+  footer?: ReactNode;
   /** Stacked layer above another modal. Bumps z-index. */
   stacked?: boolean;
   className?: string;
@@ -70,6 +72,7 @@ export function Modal({
   titleAlign = "center",
   headerLeft,
   headerExtra,
+  footer,
   stacked = false,
   className,
   children,
@@ -166,7 +169,7 @@ export function Modal({
                 "shadow-[0_24px_60px_-12px_rgba(0,0,0,0.6)] ring-1 ring-white/[0.04]",
                 renderAsSheet
                   ? "w-full max-h-[90vh] rounded-t-[28px]"
-                  : "w-full max-w-[520px] max-h-[88vh] rounded-3xl",
+                  : "w-full max-w-[450px] max-h-[88vh] rounded-3xl",
                 className,
               )}
               variants={containerVariants}
@@ -257,6 +260,12 @@ export function Modal({
               {headerExtra ? <div className="px-5 pb-4">{headerExtra}</div> : null}
 
               <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+
+              {footer ? (
+                <div className="border-t border-white/[0.06] bg-surface px-5 py-4">
+                  {footer}
+                </div>
+              ) : null}
             </motion.div>
           </div>
         </div>

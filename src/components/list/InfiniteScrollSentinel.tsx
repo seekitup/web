@@ -7,6 +7,13 @@ interface InfiniteScrollSentinelProps {
   fetchNextPage: () => void;
   rootMargin?: string;
   className?: string;
+  /**
+   * Optional scroll container to observe against. Defaults to the document
+   * viewport. Pass when the list scrolls inside an inner element (e.g. a
+   * modal with `max-h-[280px] overflow-y-auto`) — without it the sentinel
+   * never enters the viewport and `fetchNextPage` won't fire.
+   */
+  root?: Element | null;
 }
 
 /**
@@ -22,8 +29,9 @@ export function InfiniteScrollSentinel({
   fetchNextPage,
   rootMargin = "200px 0px",
   className,
+  root,
 }: InfiniteScrollSentinelProps) {
-  const { ref, inView } = useInView({ threshold: 0, rootMargin });
+  const { ref, inView } = useInView({ threshold: 0, rootMargin, root });
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

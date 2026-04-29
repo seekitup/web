@@ -14,7 +14,11 @@ import {
   isYouTubeLink,
   extractYouTubeVideoId,
   getYouTubeThumbnailUrl,
+  isLinkedInProfile,
+  isMercadoLibreProduct,
 } from "@/lib/linkUtils";
+import { LinkedInCompactCard } from "./LinkedInCompactCard";
+import { MercadoLibreCompactCard } from "./MercadoLibreCompactCard";
 
 interface CompactLinkCardProps {
   link: LinkResponseDto;
@@ -24,7 +28,49 @@ interface CompactLinkCardProps {
   actionSlot?: ReactNode;
 }
 
+/**
+ * Canonical Grid-mode link card. Dispatches LinkedIn / MercadoLibre links to
+ * their dedicated compact variants (mirrors how `LinkCard` dispatches to the
+ * full hero cards in Complete mode), and falls back to a generic 90×90
+ * thumbnail + text layout for everything else.
+ */
 export function CompactLinkCard({
+  link,
+  index,
+  itemId,
+  actionSlot,
+}: CompactLinkCardProps) {
+  if (isLinkedInProfile(link)) {
+    return (
+      <LinkedInCompactCard
+        link={link}
+        index={index}
+        {...(itemId !== undefined ? { itemId } : {})}
+        {...(actionSlot !== undefined ? { actionSlot } : {})}
+      />
+    );
+  }
+  if (isMercadoLibreProduct(link)) {
+    return (
+      <MercadoLibreCompactCard
+        link={link}
+        index={index}
+        {...(itemId !== undefined ? { itemId } : {})}
+        {...(actionSlot !== undefined ? { actionSlot } : {})}
+      />
+    );
+  }
+  return (
+    <GenericCompactLinkCard
+      link={link}
+      index={index}
+      {...(itemId !== undefined ? { itemId } : {})}
+      {...(actionSlot !== undefined ? { actionSlot } : {})}
+    />
+  );
+}
+
+function GenericCompactLinkCard({
   link,
   index,
   itemId,

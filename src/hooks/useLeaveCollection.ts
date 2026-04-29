@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 
 interface LeaveCollectionVars {
   collectionId: number;
@@ -16,9 +17,7 @@ export function useLeaveCollection() {
     mutationFn: ({ collectionId, userId }) =>
       api.collections.removeMember(collectionId, userId),
     onSuccess: (_, { collectionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
-      queryClient.invalidateQueries({ queryKey: ["my-collections"] });
+      invalidateCollection(queryClient, collectionId);
     },
   });
 }

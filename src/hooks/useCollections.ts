@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { collectionKeys } from "@/lib/queryKeys";
 import { useAuth } from "@/hooks/useAuth";
 import type {
   CollectionResponseDto,
@@ -12,7 +13,7 @@ export function useCollections(
 ) {
   const { isAuthenticated } = useAuth();
   return useQuery({
-    queryKey: ["collections", params],
+    queryKey: collectionKeys.listWithParams(params),
     queryFn: () => api.collections.list(params),
     enabled: isAuthenticated && (options.enabled ?? true),
     staleTime: 30_000,

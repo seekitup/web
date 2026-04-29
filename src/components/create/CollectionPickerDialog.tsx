@@ -344,7 +344,7 @@ export function CollectionPickerDialog({
                       <span className="min-w-0 flex-1 truncate text-[15px] text-text">
                         {c.name}
                       </span>
-                      {ownership !== "own" ? (
+                      {ownership && ownership !== "own" ? (
                         <OwnershipChip ownership={ownership} />
                       ) : null}
                       <span

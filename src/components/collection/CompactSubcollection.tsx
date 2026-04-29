@@ -1,25 +1,26 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import type {
-  LookupChildCollectionDto,
-  LookupPreviewLinkDto,
-} from "@/types/api";
 import { getPreviewImageUrl } from "@/lib/linkUtils";
+import type {
+  CollectionDisplayData,
+  CollectionDisplayPreviewLink,
+} from "@/lib/collectionDisplay";
 
 interface CompactSubcollectionProps {
-  collection: LookupChildCollectionDto;
-  parentUsername: string;
+  collection: CollectionDisplayData;
   index: number;
   itemId?: string;
+  /** Optional kebab/icon affordance rendered absolutely top-right of the card. */
+  actionSlot?: ReactNode;
 }
 
 function ThumbnailCell({
   link,
   remaining,
 }: {
-  link: LookupPreviewLinkDto;
+  link: CollectionDisplayPreviewLink;
   remaining?: number | undefined;
 }) {
   const [loaded, setLoaded] = useState(false);
@@ -76,12 +77,12 @@ function EmptyCell() {
 
 export function CompactSubcollection({
   collection,
-  parentUsername,
   index,
   itemId,
+  actionSlot,
 }: CompactSubcollectionProps) {
   const { t } = useTranslation();
-  const { previewLinks, totalLinks } = collection;
+  const { previewLinks, totalLinks, ownerUsername, slug, name } = collection;
   const gridLinks = previewLinks.slice(0, 4);
   const remaining = totalLinks - gridLinks.length;
 
@@ -91,12 +92,12 @@ export function CompactSubcollection({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.06, 0.25) }}
+      className="relative"
     >
       <Link
-        to={`/${parentUsername}/${collection.slug}`}
+        to={`/${ownerUsername}/${slug}`}
         className="block no-underline group bg-surface rounded-2xl border border-neutral-700/40 overflow-hidden hover:border-neutral-600/60 transition-colors"
       >
-        {/* 2x2 Thumbnail Grid */}
         <div className="aspect-[4/3] grid grid-cols-2 grid-rows-2 gap-[1px] bg-neutral-700/30">
           {gridLinks.length === 0 ? (
             <>
@@ -139,7 +140,6 @@ export function CompactSubcollection({
           )}
         </div>
 
-        {/* Label inside card */}
         <div className="px-3 py-2.5">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
@@ -159,7 +159,7 @@ export function CompactSubcollection({
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="text-white text-sm font-semibold truncate group-hover:text-primary-light transition-colors">
-                {collection.name}
+                {name}
               </h4>
             </div>
           </div>
@@ -168,6 +168,18 @@ export function CompactSubcollection({
           </p>
         </div>
       </Link>
+
+      {actionSlot ? (
+        <span
+          className="absolute top-2 right-2 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {actionSlot}
+        </span>
+      ) : null}
     </motion.div>
   );
 }

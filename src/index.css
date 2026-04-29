@@ -31,6 +31,13 @@
 
 html {
   scroll-behavior: smooth;
+  /* 64px navbar + ~64px collapsed PageHeader so anchor jumps land below the sticky chrome. */
+  scroll-padding-top: calc(64px + 64px);
+}
+
+#root {
+  zoom: 0.95;
+  height: 100%;
 }
 
 button {

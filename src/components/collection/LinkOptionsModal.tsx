@@ -6,6 +6,9 @@ import { OptionRow } from "@/components/ui/OptionRow";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { TextField } from "@/components/ui/TextField";
 import { Avatar } from "@/components/ui/Avatar";
+import { Favicon } from "@/components/ui/Favicon";
+import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { ProgressiveMedia } from "@/components/ui/ProgressiveMedia";
 import {
   CopyIcon,
   PlusIcon,
@@ -36,7 +39,6 @@ import {
   getLinkDisplayTitle,
   getLinkFavicon,
   getLinkPrimaryMedia,
-  getLinkThumbnailUrl,
 } from "@/lib/linkUtils";
 import { getRelativeTime } from "@/lib/relativeTime";
 import { shareUrl } from "@/lib/share";
@@ -108,7 +110,6 @@ export function LinkOptionsModal({
 
   const linkTitle = link ? getLinkDisplayTitle(link) : "";
   const favicon = link ? getLinkFavicon(link) : undefined;
-  const thumbnailUrl = link ? getLinkThumbnailUrl(link) : undefined;
   const primaryMedia = link ? getLinkPrimaryMedia(link) : undefined;
 
   const handleCopy = useCallback(async () => {
@@ -205,33 +206,29 @@ export function LinkOptionsModal({
         titleAlign="left"
         headerLeft={
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative h-12 w-12 shrink-0 rounded-xl bg-white/[0.05] overflow-hidden">
-              {thumbnailUrl ? (
-                <img
-                  src={thumbnailUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="lazy"
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
+              {primaryMedia ? (
+                <ProgressiveMedia
+                  file={primaryMedia}
+                  width={48}
+                  height={48}
+                  borderRadius={12}
+                  thumbnailOnly
                 />
-              ) : primaryMedia?.url ? (
-                <img
-                  src={primaryMedia.url}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-              ) : null}
-              {favicon?.url ? (
-                <span className="absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-md ring-2 ring-surface bg-surface">
-                  <img
-                    src={favicon.url}
+              ) : (
+                <ImagePlaceholder size="compact" />
+              )}
+              {favicon?.url || link.domain ? (
+                <span className="absolute -bottom-1 -right-1 inline-flex items-center justify-center rounded-md ring-2 ring-surface bg-surface">
+                  <Favicon
+                    src={favicon?.url}
+                    domain={link.domain}
                     alt=""
-                    className="h-3.5 w-3.5 rounded-sm"
-                    loading="lazy"
+                    size={14}
                   />
                 </span>
               ) : null}
-            </div>
+            </span>
             <div className="min-w-0">
               <h2 className="text-[15px] font-semibold text-text truncate">
                 {linkTitle}
@@ -311,25 +308,28 @@ export function LinkOptionsModal({
           {/* Select mode: gated identically to mobile (`canSelect && selectMode`).
               Web has no select-mode caller yet, so we render nothing. */}
 
-          <div className="h-px bg-white/[0.06] my-1.5" />
-
-          {showRemove ? (
-            <OptionRow
-              icon={<MinusCircleIcon />}
-              tone="danger"
-              label={t("linkOptions.removeFromCollection")}
-              onClick={() => setSub({ kind: "remove-confirm" })}
-              loading={removeFromCollection.isPending}
-            />
-          ) : null}
-          {showDelete ? (
-            <OptionRow
-              icon={<TrashIcon />}
-              tone="danger"
-              label={t("linkOptions.delete")}
-              onClick={() => setSub({ kind: "delete-confirm" })}
-              loading={deleteLink.isPending}
-            />
+          {showRemove || showDelete ? (
+            <>
+              <div className="h-px bg-white/[0.06] my-1.5" />
+              {showRemove ? (
+                <OptionRow
+                  icon={<MinusCircleIcon />}
+                  tone="danger"
+                  label={t("linkOptions.removeFromCollection")}
+                  onClick={() => setSub({ kind: "remove-confirm" })}
+                  loading={removeFromCollection.isPending}
+                />
+              ) : null}
+              {showDelete ? (
+                <OptionRow
+                  icon={<TrashIcon />}
+                  tone="danger"
+                  label={t("linkOptions.delete")}
+                  onClick={() => setSub({ kind: "delete-confirm" })}
+                  loading={deleteLink.isPending}
+                />
+              ) : null}
+            </>
           ) : null}
         </div>
       </Modal>

@@ -1,11 +1,7 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import type {
-  LookupChildCollectionDto,
-  LookupPreviewLinkDto,
-} from "@/types/api";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Favicon } from "@/components/ui/Favicon";
 import {
@@ -14,15 +10,20 @@ import {
   getPreviewImageUrl,
   formatLinkPrice,
 } from "@/lib/linkUtils";
+import type {
+  CollectionDisplayData,
+  CollectionDisplayPreviewLink,
+} from "@/lib/collectionDisplay";
 
 interface ExpandedSubcollectionProps {
-  collection: LookupChildCollectionDto;
-  parentUsername: string;
+  collection: CollectionDisplayData;
   index: number;
   itemId?: string;
+  /** Optional kebab/icon affordance rendered absolutely in the header. */
+  actionSlot?: ReactNode;
 }
 
-function getPreviewTitle(link: LookupPreviewLinkDto): string {
+function getPreviewTitle(link: CollectionDisplayPreviewLink): string {
   const titlesMatch = link.title?.trim() === link.ogTitle?.trim();
   if (titlesMatch) {
     if (link.platformPostTitle?.trim()) return link.platformPostTitle.trim();
@@ -31,18 +32,18 @@ function getPreviewTitle(link: LookupPreviewLinkDto): string {
   return link.title || link.ogTitle || link.url;
 }
 
-// Use shared getPreviewImageUrl from linkUtils
-
-function getPreviewFavicon(link: LookupPreviewLinkDto): string | undefined {
+function getPreviewFavicon(
+  link: CollectionDisplayPreviewLink,
+): string | undefined {
   const faviconFile = link.files.find((f) => f.purpose === "favicon");
   return faviconFile?.url;
 }
 
-function getPreviewSource(link: LookupPreviewLinkDto): string {
+function getPreviewSource(link: CollectionDisplayPreviewLink): string {
   return link.platformUserName ? `@${link.platformUserName}` : link.domain;
 }
 
-function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
+function PreviewCard({ link }: { link: CollectionDisplayPreviewLink }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const imageUrl = getPreviewImageUrl(link);
   const title = getPreviewTitle(link);
@@ -60,7 +61,6 @@ function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
       rel="noopener noreferrer"
       className="shrink-0 w-[200px] bg-surface-light rounded-xl overflow-hidden hover:scale-[1.02] hover:brightness-110 transition-all duration-200 no-underline group"
     >
-      {/* Image — subtle light backing so transparent PNGs stay visible */}
       <div className="relative w-full aspect-[4/3] bg-background overflow-hidden">
         {imageUrl ? (
           <>
@@ -98,7 +98,6 @@ function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
         )}
       </div>
 
-      {/* Content */}
       <div className="p-3">
         <h4 className="text-white text-xs font-semibold leading-snug line-clamp-2 mb-1.5 group-hover:text-primary-light transition-colors">
           {title}
@@ -121,13 +120,14 @@ function PreviewCard({ link }: { link: LookupPreviewLinkDto }) {
 
 export function ExpandedSubcollection({
   collection,
-  parentUsername,
   index,
   itemId,
+  actionSlot,
 }: ExpandedSubcollectionProps) {
   const { t } = useTranslation();
-  const { previewLinks, totalLinks } = collection;
+  const { previewLinks, totalLinks, ownerUsername, slug, name } = collection;
   const remaining = totalLinks - previewLinks.length;
+  const collectionPath = `/${ownerUsername}/${slug}`;
 
   return (
     <motion.div
@@ -135,11 +135,10 @@ export function ExpandedSubcollection({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.08, 0.3) }}
-      className="mb-4 bg-surface rounded-2xl border border-neutral-700/40 overflow-hidden"
+      className="mb-4 bg-surface rounded-2xl border border-neutral-700/40 overflow-hidden relative"
     >
-      {/* Header */}
       <Link
-        to={`/${parentUsername}/${collection.slug}`}
+        to={collectionPath}
         className="flex items-center gap-2 px-4 pt-3.5 pb-3 group no-underline"
       >
         <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -158,7 +157,7 @@ export function ExpandedSubcollection({
           </svg>
         </div>
         <h3 className="text-white text-sm font-semibold truncate group-hover:text-primary-light transition-colors">
-          {collection.name}
+          {name}
         </h3>
         <span className="text-neutral-600 text-xs shrink-0">
           {t("common.link", { count: totalLinks })}
@@ -172,23 +171,35 @@ export function ExpandedSubcollection({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-neutral-600 shrink-0 group-hover:text-primary-light transition-colors ml-auto"
+          className={`text-neutral-600 shrink-0 group-hover:text-primary-light transition-colors ml-auto ${
+            actionSlot ? "mr-10" : ""
+          }`}
         >
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </Link>
 
-      {/* Horizontal scroll of preview cards */}
+      {actionSlot ? (
+        <span
+          className="absolute top-2.5 right-3 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {actionSlot}
+        </span>
+      ) : null}
+
       {previewLinks.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide">
           {previewLinks.map((link) => (
             <PreviewCard key={link.id} link={link} />
           ))}
 
-          {/* "See all" card */}
           {remaining > 0 && (
             <Link
-              to={`/${parentUsername}/${collection.slug}`}
+              to={collectionPath}
               className="shrink-0 w-[200px] bg-surface-light rounded-xl overflow-hidden flex flex-col items-center justify-center no-underline hover:brightness-125 transition-all group"
             >
               <div className="text-2xl font-bold text-primary mb-1">

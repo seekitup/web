@@ -417,6 +417,7 @@ const es: Translations = {
     shared: "Compartida",
     collaborative: "Compartida",
     saved: "Guardada",
+    pending: "Pendiente",
   },
 
   createModal: {
@@ -599,6 +600,7 @@ const es: Translations = {
     filterMy: "Mías",
     filterInvited: "Invitado",
     filterPending: "Pendientes",
+    filterSaved: "Guardadas",
     sortLabel: "Ordenar",
     sortByCreated: "Fecha de creación",
     sortByLastViewed: "Vista recientemente",
@@ -615,6 +617,9 @@ const es: Translations = {
     emptyPendingTitle: "No hay invitaciones pendientes",
     emptyPendingSubtitle:
       "Las invitaciones para unirte a colecciones van a aparecer acá.",
+    emptySavedTitle: "Aún no tenés colecciones guardadas",
+    emptySavedSubtitle:
+      "Las colecciones públicas que guardes van a aparecer acá.",
     emptyFilteredTitle: "Ninguna colección coincide con los filtros",
     emptyFilteredSubtitle: "Probá quitando un filtro o cambiando a Todas.",
     errorTitle: "No pudimos cargar tus colecciones",
@@ -657,6 +662,11 @@ const es: Translations = {
     failed: "No pudimos compartir — probá de nuevo",
   },
 
+  qrModal: {
+    share: "Compartir",
+    shareError: "No pudimos compartir",
+  },
+
   relativeTime: {
     justNow: "recién",
     minutesAgo_one: "hace {{count}} minuto",
@@ -695,7 +705,7 @@ const es: Translations = {
     editEditors: "Administrar editores",
     editEditorsTitle: "Administrar editores",
     editEditorsError: "No pudimos actualizar el editor",
-    noEditorsYet: "Sin editores aún — invitá a alguien abajo.",
+    noEditorsYet: "Todavía no hay nadie. Invitá a alguien abajo.",
     inviteEditorLabel: "Invitar por email",
     invitePlaceholder: "nombre@ejemplo.com",
     inviteButton: "Invitar",
@@ -704,6 +714,16 @@ const es: Translations = {
     removeMember: "Quitar",
     shareableNote: "Quien invites va a usar este link: {{url}}",
     editorsCreatedRelative: "Colección creada {{time}}",
+    editorsSectionTitle: "Personas con acceso",
+    editorsCount_one: "{{count}} persona",
+    editorsCount_other: "{{count}} personas",
+    editorPendingBadge: "Pendiente",
+    editorOwnerBadge: "Propietario",
+    editorsLoadError: "No pudimos cargar la lista",
+    editorsLoading: "Cargando…",
+    resendInvite: "Reenviar",
+    resendInviteSuccess: "Invitación reenviada",
+    resendInviteError: "No pudimos reenviar la invitación",
     select: "Seleccionar",
     delete: "Eliminar colección",
     deleteTitle: "¿Eliminar esta colección?",
@@ -721,10 +741,28 @@ const es: Translations = {
     parentError: "No pudimos actualizar los padres",
     createdBy: "Creada por {{name}}",
     sharedBy: "Compartida por {{name}}",
+    addToShared: "Agregar a Colecciones compartidas",
+    acceptSuccess: "Invitación aceptada",
+    acceptError: "No se pudo aceptar la invitación. Intenta de nuevo.",
     linkCount_one: "{{count}} link",
     linkCount_other: "{{count}} links",
     subcollectionCount_one: "{{count}} subcolección",
     subcollectionCount_other: "{{count}} subcolecciones",
+  },
+
+  savedCollections: {
+    save: "Guardar",
+    saved: "Guardada",
+    saveCardTitle: "Guarda esta colección",
+    saveCardSubtitle:
+      "Agrégala a tus colecciones guardadas para encontrarla luego.",
+    savedCardTitle: "Guardada en tus colecciones",
+    savedCardSubtitle:
+      "Puedes encontrarla en tus colecciones guardadas cuando quieras.",
+    saveSuccess: "Colección guardada",
+    unsaveSuccess: "Eliminada de guardadas",
+    saveError: "No pudimos guardar la colección. Intenta de nuevo.",
+    unsaveError: "No pudimos eliminarla de guardadas. Intenta de nuevo.",
   },
 
   linkOptions: {

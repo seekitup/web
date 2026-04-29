@@ -198,20 +198,3 @@ export function SettingsRow({
 
   return inner;
 }
-
-interface AccountPageHeaderProps {
-  title: string;
-  subtitle?: string;
-}
-
-/** Reusable header for sub-pages with title + subtitle. */
-export function AccountPageHeader({ title, subtitle }: AccountPageHeaderProps) {
-  return (
-    <header className="mb-6">
-      <h1 className="text-2xl font-bold text-text">{title}</h1>
-      {subtitle ? (
-        <p className="mt-1 text-text-dim">{subtitle}</p>
-      ) : null}
-    </header>
-  );
-}

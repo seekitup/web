@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { collectionKeys } from "@/lib/queryKeys";
 import { useAuth } from "@/hooks/useAuth";
 import type { CollectionResponseDto } from "@/types/api";
 
@@ -14,7 +15,7 @@ interface UseMyCollectionsOptions {
 export function useMyCollections({ limit = 8 }: UseMyCollectionsOptions = {}) {
   const { isAuthenticated } = useAuth();
   return useQuery({
-    queryKey: ["my-collections", { limit }],
+    queryKey: collectionKeys.my({ limit }),
     queryFn: () =>
       api.collections.list({
         filter: "my",

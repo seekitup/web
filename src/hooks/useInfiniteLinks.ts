@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { api } from "@/lib/api";
+import { linkKeys } from "@/lib/queryKeys";
 import { useAuth } from "@/hooks/useAuth";
 import type { LinkResponseDto, LinksQueryParams } from "@/types/api";
 
@@ -18,7 +19,7 @@ export function useInfiniteLinks(
   const { pageSize = DEFAULT_PAGE_SIZE, ...rest } = params;
 
   const query = useInfiniteQuery({
-    queryKey: ["links", "infinite", { ...rest, pageSize }],
+    queryKey: linkKeys.infinite({ ...rest, pageSize }),
     queryFn: ({ pageParam }) =>
       api.links.list({ ...rest, page: pageParam, limit: pageSize }),
     initialPageParam: 1,

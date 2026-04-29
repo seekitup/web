@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { searchKeys } from "@/lib/queryKeys";
 import { filterCachedData } from "@/lib/searchCacheScan";
 import type { SearchContext, SearchResponse } from "@/types/api";
 import { useDebouncedValue } from "./useDebouncedValue";
@@ -44,7 +45,7 @@ export function useSearch({ initialQuery = "", context }: UseSearchOptions = {})
 
   // Phase 2: backend search.
   const backendQuery = useQuery<SearchResponse>({
-    queryKey: ["search", { q: debouncedQuery, context }],
+    queryKey: searchKeys.query({ q: debouncedQuery, context }),
     queryFn: () => api.search.search({ q: debouncedQuery, context }),
     enabled: debouncedQuery.length >= 2,
     staleTime: 60_000,

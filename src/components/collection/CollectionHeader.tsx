@@ -13,6 +13,7 @@ export function CollectionHeader({
   titleRef,
 }: CollectionHeaderProps) {
   const { user, members } = collection;
+  const otherMembers = members.filter((m) => m.id !== user.id);
 
   return (
     <motion.div
@@ -57,10 +58,10 @@ export function CollectionHeader({
         </div>
 
         {/* Member avatars */}
-        {members.length > 1 && (
+        {otherMembers.length > 1 && (
           <div className="flex items-center">
             <div className="flex -space-x-2">
-              {members.slice(0, 4).map((member) => (
+              {otherMembers.slice(0, 4).map((member) => (
                 <Avatar
                   key={member.id}
                   user={member}
@@ -69,9 +70,9 @@ export function CollectionHeader({
                 />
               ))}
             </div>
-            {members.length > 4 && (
+            {otherMembers.length > 4 && (
               <span className="text-neutral-500 text-xs ml-1">
-                +{members.length - 4}
+                +{otherMembers.length - 4}
               </span>
             )}
           </div>

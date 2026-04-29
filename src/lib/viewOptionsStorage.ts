@@ -1,5 +1,5 @@
 export type LinksFilter = "all" | "my" | "shared";
-export type CollectionsFilter = "all" | "my" | "invited" | "pending";
+export type CollectionsFilter = "all" | "my" | "invited" | "pending" | "saved";
 export type SortByOption = "createdAt" | "lastViewedAt";
 export type LinksVisibility = "public" | "private" | undefined;
 
@@ -31,6 +31,7 @@ const COLLECTIONS_FILTERS: readonly CollectionsFilter[] = [
   "my",
   "invited",
   "pending",
+  "saved",
 ];
 const SORT_OPTIONS: readonly SortByOption[] = ["createdAt", "lastViewedAt"];
 const VISIBILITY_OPTIONS: readonly Exclude<LinksVisibility, undefined>[] = [

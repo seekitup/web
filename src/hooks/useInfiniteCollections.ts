@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { api } from "@/lib/api";
+import { collectionKeys } from "@/lib/queryKeys";
 import { useAuth } from "@/hooks/useAuth";
 import type {
   CollectionResponseDto,
@@ -24,7 +25,7 @@ export function useInfiniteCollections(
   const { pageSize = DEFAULT_PAGE_SIZE, ...rest } = params;
 
   const query = useInfiniteQuery({
-    queryKey: ["collections", "infinite", { ...rest, pageSize }],
+    queryKey: collectionKeys.infinite({ ...rest, pageSize }),
     queryFn: ({ pageParam }) =>
       api.collections.list({ ...rest, page: pageParam, limit: pageSize }),
     initialPageParam: 1,

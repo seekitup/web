@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { linkKeys } from "@/lib/queryKeys";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 import type { UpdateCollectionLinkVisibilityDto } from "@/types/api";
 
 interface Vars {
@@ -18,8 +20,10 @@ export function useUpdateCollectionLinkVisibility() {
     mutationFn: ({ collectionId, linkId, data }) =>
       api.collections.updateLinkVisibility(collectionId, linkId, data),
     onSuccess: (_, { collectionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({ queryKey: ["links"] });
+      invalidateCollection(queryClient, collectionId);
+      // Also refresh any global link queries that may surface this link's
+      // visibility flag (search results, library list).
+      queryClient.invalidateQueries({ queryKey: linkKeys.all() });
     },
   });
 }

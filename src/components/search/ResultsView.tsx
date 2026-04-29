@@ -11,11 +11,13 @@ import type {
   CollectionResponseDto,
   LinkResponseDto,
 } from "@/types/api";
-import { CompactLinkCard } from "@/components/collection/CompactLinkCard";
+import { GridLinkCard } from "@/components/search/grid-cards";
 import { LinkCard } from "@/components/collection/LinkCard";
+import { CompactSubcollection } from "@/components/collection/CompactSubcollection";
+import { ExpandedSubcollection } from "@/components/collection/ExpandedSubcollection";
 import { useVisibleLinkTracker } from "@/hooks/useVisibleLinkTracker";
 import { GhostAddCard } from "@/components/ui/GhostAddCard";
-import { GridCollectionCard } from "./GridCollectionCard";
+import { fromCollectionResponse } from "@/lib/collectionDisplay";
 import { MiniCollectionRow } from "./MiniCollectionRow";
 import { MiniLinkRow } from "./MiniLinkRow";
 import {
@@ -56,6 +58,17 @@ export interface ResultsViewProps {
   skeleton?: ReactNode;
   onLinkClick?: (link: LinkResponseDto) => void;
   onCollectionClick?: (collection: CollectionResponseDto) => void;
+  /**
+   * Optional per-link kebab/options renderer. When supplied, the returned
+   * node is rendered as the `actionSlot` on every link card across all three
+   * view modes. Pages typically pass this only when the user is authenticated.
+   */
+  renderLinkActions?: (link: LinkResponseDto) => ReactNode;
+  /**
+   * Optional per-collection kebab/options renderer. Same contract as
+   * `renderLinkActions` but for collection cards.
+   */
+  renderCollectionActions?: (collection: CollectionResponseDto) => ReactNode;
   /**
    * Per-section ghost add-card. Rendered as the LAST item of the matching
    * section (in compact/grid/complete modes), shape derived from the active
@@ -125,6 +138,8 @@ export function ResultsView({
   skeleton,
   onLinkClick,
   onCollectionClick,
+  renderLinkActions,
+  renderCollectionActions,
   addCard,
   hideSectionHeaders = false,
   className,
@@ -214,6 +229,7 @@ export function ResultsView({
                     visibleLinkId={visibleLinkId}
                     onVisibilityChange={handleVisibilityChange}
                     addCard={addCard?.[section.key]}
+                    renderLinkActions={renderLinkActions}
                   />
                 ) : (
                   <CollectionSectionBody
@@ -222,6 +238,7 @@ export function ResultsView({
                     highlightQuery={highlightQuery}
                     onCollectionClick={onCollectionClick}
                     addCard={addCard?.[section.key]}
+                    renderCollectionActions={renderCollectionActions}
                   />
                 )}
               </section>
@@ -345,6 +362,7 @@ interface LinkSectionBodyProps {
   visibleLinkId: number | null;
   onVisibilityChange: (id: number, inView: boolean) => void;
   addCard: ResultsViewAddCard | undefined;
+  renderLinkActions: ((link: LinkResponseDto) => ReactNode) | undefined;
 }
 
 function LinkSectionBody({
@@ -355,6 +373,7 @@ function LinkSectionBody({
   visibleLinkId,
   onVisibilityChange,
   addCard,
+  renderLinkActions,
 }: LinkSectionBodyProps) {
   if (mode === "compact") {
     return (
@@ -376,6 +395,9 @@ function LinkSectionBody({
               link={link}
               onClick={(l) => onLinkClick?.(l)}
               highlightQuery={highlightQuery}
+              {...(renderLinkActions
+                ? { actionSlot: renderLinkActions(link) }
+                : {})}
             />
           </li>
         ))}
@@ -384,7 +406,7 @@ function LinkSectionBody({
   }
   if (mode === "grid") {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid auto-rows-fr grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {addCard ? (
           <GhostAddCard
             variant="grid"
@@ -400,6 +422,7 @@ function LinkSectionBody({
             link={link}
             index={i}
             onLinkClick={onLinkClick}
+            actionSlot={renderLinkActions?.(link)}
           />
         ))}
       </div>
@@ -407,7 +430,7 @@ function LinkSectionBody({
   }
   // complete
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-[480px] space-y-4">
       {addCard ? (
         <GhostAddCard
           variant="complete"
@@ -425,6 +448,7 @@ function LinkSectionBody({
           isVisible={link.id === visibleLinkId}
           onVisibilityChange={onVisibilityChange}
           onLinkClick={onLinkClick}
+          actionSlot={renderLinkActions?.(link)}
         />
       ))}
     </div>
@@ -439,6 +463,9 @@ interface CollectionSectionBodyProps {
     | ((collection: CollectionResponseDto) => void)
     | undefined;
   addCard: ResultsViewAddCard | undefined;
+  renderCollectionActions:
+    | ((collection: CollectionResponseDto) => ReactNode)
+    | undefined;
 }
 
 function CollectionSectionBody({
@@ -447,6 +474,7 @@ function CollectionSectionBody({
   highlightQuery,
   onCollectionClick,
   addCard,
+  renderCollectionActions,
 }: CollectionSectionBodyProps) {
   if (mode === "compact") {
     return (
@@ -468,31 +496,62 @@ function CollectionSectionBody({
               collection={collection}
               onClick={(c) => onCollectionClick?.(c)}
               highlightQuery={highlightQuery}
+              {...(renderCollectionActions
+                ? { actionSlot: renderCollectionActions(collection) }
+                : {})}
             />
           </li>
         ))}
       </ul>
     );
   }
-  // grid (also used as fallback for complete)
+  if (mode === "grid") {
+    return (
+      <div className="grid auto-rows-fr grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {addCard ? (
+          <GhostAddCard
+            variant="grid"
+            type="collection"
+            label={addCard.label}
+            caption={addCard.caption}
+            onClick={addCard.onClick}
+          />
+        ) : null}
+        {items.map((collection, i) => (
+          <CollectionCardWrapper
+            key={collection.id}
+            collection={collection}
+            index={i}
+            variant="grid"
+            onCollectionClick={onCollectionClick}
+            actionSlot={renderCollectionActions?.(collection)}
+          />
+        ))}
+      </div>
+    );
+  }
+  // complete — vertical stack of horizontal-scroll subcollection sections
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mx-auto w-full max-w-[480px]">
       {addCard ? (
-        <GhostAddCard
-          variant="grid"
-          type="collection"
-          label={addCard.label}
-          caption={addCard.caption}
-          onClick={addCard.onClick}
-        />
+        <div className="mb-3">
+          <GhostAddCard
+            variant="grid"
+            type="collection"
+            label={addCard.label}
+            caption={addCard.caption}
+            onClick={addCard.onClick}
+          />
+        </div>
       ) : null}
       {items.map((collection, i) => (
-        <GridCollectionCard
+        <CollectionCardWrapper
           key={collection.id}
           collection={collection}
           index={i}
-          onClick={(c) => onCollectionClick?.(c)}
-          highlightQuery={highlightQuery}
+          variant="complete"
+          onCollectionClick={onCollectionClick}
+          actionSlot={renderCollectionActions?.(collection)}
         />
       ))}
     </div>
@@ -500,22 +559,86 @@ function CollectionSectionBody({
 }
 
 /**
- * CompactLinkCard is an `<a target="_blank">`. We delegate to it directly when
- * no custom click handler is provided; otherwise we wrap it so we can intercept
- * the click and call the consumer's callback (e.g., to record a recent search).
+ * Subcollection cards navigate via an internal `<Link>` to the owner's
+ * collection URL. When the consumer supplies an `onCollectionClick` callback
+ * (e.g., recording a recent search), we capture the click before navigation.
+ */
+function CollectionCardWrapper({
+  collection,
+  index,
+  variant,
+  onCollectionClick,
+  actionSlot,
+}: {
+  collection: CollectionResponseDto;
+  index: number;
+  variant: "grid" | "complete";
+  onCollectionClick: ((c: CollectionResponseDto) => void) | undefined;
+  actionSlot: ReactNode | undefined;
+}) {
+  const display = fromCollectionResponse(collection);
+  const card =
+    variant === "grid" ? (
+      <CompactSubcollection
+        collection={display}
+        index={index}
+        {...(actionSlot !== undefined ? { actionSlot } : {})}
+      />
+    ) : (
+      <ExpandedSubcollection
+        collection={display}
+        index={index}
+        {...(actionSlot !== undefined ? { actionSlot } : {})}
+      />
+    );
+
+  if (!onCollectionClick) return card;
+
+  return (
+    <div
+      onClickCapture={(e) => {
+        if (
+          e.metaKey ||
+          e.ctrlKey ||
+          e.shiftKey ||
+          e.altKey ||
+          (e as unknown as MouseEvent).button === 1
+        ) {
+          return;
+        }
+        onCollectionClick(collection);
+      }}
+    >
+      {card}
+    </div>
+  );
+}
+
+/**
+ * GridLinkCard renders an `<a target="_blank">` (or a div with role="link" for
+ * the MercadoLibre variant). We delegate to it directly when no custom click
+ * handler is provided; otherwise we wrap it so we can intercept the click and
+ * call the consumer's callback (e.g., to record a recent search).
  */
 function CompactLinkCardWrapper({
   link,
   index,
   onLinkClick,
+  actionSlot,
 }: {
   link: LinkResponseDto;
   index: number;
   onLinkClick: ((link: LinkResponseDto) => void) | undefined;
+  actionSlot: ReactNode | undefined;
 }) {
-  if (!onLinkClick) {
-    return <CompactLinkCard link={link} index={index} />;
-  }
+  const card = (
+    <GridLinkCard
+      link={link}
+      index={index}
+      {...(actionSlot !== undefined ? { actionSlot } : {})}
+    />
+  );
+  if (!onLinkClick) return card;
   return (
     <div
       onClickCapture={(e) => {
@@ -530,10 +653,15 @@ function CompactLinkCardWrapper({
         ) {
           return;
         }
+        // Skip when the click originated on an inner button (e.g., action
+        // slot kebab) so the button's own handler can run alone.
+        if ((e.target as Element | null)?.closest("button")) {
+          return;
+        }
         onLinkClick(link);
       }}
     >
-      <CompactLinkCard link={link} index={index} />
+      {card}
     </div>
   );
 }
@@ -544,12 +672,14 @@ function LinkCardWrapper({
   isVisible,
   onVisibilityChange,
   onLinkClick,
+  actionSlot,
 }: {
   link: LinkResponseDto;
   index: number;
   isVisible: boolean;
   onVisibilityChange: (id: number, inView: boolean) => void;
   onLinkClick: ((link: LinkResponseDto) => void) | undefined;
+  actionSlot: ReactNode | undefined;
 }) {
   const card = (
     <LinkCard
@@ -557,6 +687,7 @@ function LinkCardWrapper({
       index={index}
       isVisible={isVisible}
       onVisibilityChange={onVisibilityChange}
+      {...(actionSlot !== undefined ? { actionSlot } : {})}
     />
   );
   if (!onLinkClick) return card;
@@ -570,6 +701,12 @@ function LinkCardWrapper({
           e.altKey ||
           (e as unknown as MouseEvent).button === 1
         ) {
+          return;
+        }
+        // Skip when the click originated on an inner control (carousel
+        // arrows, mute toggle, action slot button) so those buttons can do
+        // their own thing without triggering link navigation.
+        if ((e.target as Element | null)?.closest("button")) {
           return;
         }
         onLinkClick(link);

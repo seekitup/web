@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 import type {
   CollectionResponseDto,
   DuplicateCollectionDto,
@@ -14,9 +15,8 @@ export function useDuplicateCollection() {
   const queryClient = useQueryClient();
   return useMutation<CollectionResponseDto, unknown, DuplicateCollectionVars>({
     mutationFn: ({ id, data }) => api.collections.duplicate(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
-      queryClient.invalidateQueries({ queryKey: ["my-collections"] });
+    onSuccess: (duplicated) => {
+      invalidateCollection(queryClient, duplicated.id);
     },
   });
 }

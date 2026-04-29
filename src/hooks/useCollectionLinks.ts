@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { linkKeys } from "@/lib/queryKeys";
 import type { LinkResponseDto } from "@/types/api";
 
 const PAGE_SIZE = 20;
@@ -15,7 +16,7 @@ const PAGE_SIZE = 20;
  */
 export function useCollectionLinks(collectionId: number | undefined) {
   return useInfiniteQuery({
-    queryKey: ["links", "collection", "infinite", collectionId],
+    queryKey: linkKeys.inCollection(collectionId),
     queryFn: ({ pageParam }) =>
       api.links.list({
         collectionId: collectionId!,

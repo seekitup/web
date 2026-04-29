@@ -7,6 +7,7 @@ import {
   SettingsSection,
   SettingsRow,
 } from "@/components/account/SettingsSection";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { LANGUAGES } from "@/components/account/languages";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -127,24 +128,15 @@ export function AccountPage() {
         <title>{t("accountScreen.title")} | Seekitup</title>
       </Helmet>
 
-      <header className="mb-8 flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:gap-6 md:text-left">
-        <AvatarPicker user={user} size={92} />
-        <div className="min-w-0 max-w-full">
-          {fullName ? (
-            <h1 className="text-2xl font-bold text-text">{fullName}</h1>
-          ) : (
-            <h1 className="text-2xl font-bold text-text">@{user.username}</h1>
-          )}
-          {fullName ? (
-            <p className="text-text-dim">@{user.username}</p>
-          ) : null}
-          <p className="mt-0.5 break-all text-sm text-text-dim sm:break-normal sm:truncate">
-            {user.email}
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title={fullName || `@${user.username}`}
+        subtitle={
+          fullName ? `@${user.username} · ${user.email}` : user.email
+        }
+        adornment={<AvatarPicker user={user} size={64} />}
+      />
 
-      <div className="flex flex-col gap-7">
+      <div className="mt-8 flex flex-col gap-7">
         <SettingsSection title={t("accountScreen.profileSection")}>
           <SettingsRow
             label={t("accountScreen.nameRow")}

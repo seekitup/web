@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { BackButton } from "@/components/auth/BackButton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
 import { api } from "@/lib/api";
@@ -77,19 +78,15 @@ export function AccountPasswordPage() {
       <Helmet>
         <title>{t("accountPasswordScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-text">
-          {t("accountPasswordScreen.title")}
-        </h1>
-        <p className="mt-1 text-text-dim">
-          {t("accountPasswordScreen.subtitle")}
-        </p>
-      </header>
+      <PageHeader
+        leading={<BackButton to="/account" />}
+        title={t("accountPasswordScreen.title")}
+        subtitle={t("accountPasswordScreen.subtitle")}
+      />
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col gap-5"
+        className="mt-6 flex flex-col gap-5"
         noValidate
       >
         <PasswordField

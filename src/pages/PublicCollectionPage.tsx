@@ -256,7 +256,7 @@ export function PublicCollectionPage() {
         <meta property="og:type" content="website" />
         <meta
           name="apple-itunes-app"
-          content={`app-id=6757165497, app-argument=https://seekitup.com/${username}/${slug}`}
+          content={`app-id=6757165497, app-argument=https://www.seekitup.com/${username}/${slug}`}
         />
       </Helmet>
 

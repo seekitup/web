@@ -415,6 +415,7 @@ const en = {
     shared: "Shared",
     collaborative: "Shared",
     saved: "Saved",
+    pending: "Pending",
   },
 
   createModal: {
@@ -597,6 +598,7 @@ const en = {
     filterMy: "Mine",
     filterInvited: "Invited",
     filterPending: "Pending",
+    filterSaved: "Saved",
     sortLabel: "Sort",
     sortByCreated: "Date created",
     sortByLastViewed: "Last viewed",
@@ -613,6 +615,9 @@ const en = {
     emptyPendingTitle: "No pending invitations",
     emptyPendingSubtitle:
       "Invitations to join collections will appear here.",
+    emptySavedTitle: "No saved collections yet",
+    emptySavedSubtitle:
+      "Public collections you save will appear here.",
     emptyFilteredTitle: "No collections match your filters",
     emptyFilteredSubtitle: "Try clearing a filter or switching to All.",
     errorTitle: "Couldn't load your collections",
@@ -655,6 +660,11 @@ const en = {
     failed: "Couldn't share — try again",
   },
 
+  qrModal: {
+    share: "Share",
+    shareError: "Couldn't share",
+  },
+
   relativeTime: {
     justNow: "just now",
     minutesAgo_one: "{{count}} minute ago",
@@ -693,7 +703,7 @@ const en = {
     editEditors: "Manage editors",
     editEditorsTitle: "Manage editors",
     editEditorsError: "Couldn't update editor",
-    noEditorsYet: "No editors yet — invite someone below.",
+    noEditorsYet: "No one here yet. Invite someone below.",
     inviteEditorLabel: "Invite by email",
     invitePlaceholder: "name@example.com",
     inviteButton: "Invite",
@@ -702,6 +712,16 @@ const en = {
     removeMember: "Remove",
     shareableNote: "Anyone you invite will use this link: {{url}}",
     editorsCreatedRelative: "Collection created {{time}}",
+    editorsSectionTitle: "People with access",
+    editorsCount_one: "{{count}} person",
+    editorsCount_other: "{{count}} people",
+    editorPendingBadge: "Pending",
+    editorOwnerBadge: "Owner",
+    editorsLoadError: "Couldn't load the list",
+    editorsLoading: "Loading…",
+    resendInvite: "Resend",
+    resendInviteSuccess: "Invitation resent",
+    resendInviteError: "Couldn't resend the invitation",
     select: "Select",
     delete: "Delete collection",
     deleteTitle: "Delete this collection?",
@@ -718,10 +738,28 @@ const en = {
     parentError: "Couldn't update parents",
     createdBy: "Created by {{name}}",
     sharedBy: "Shared by {{name}}",
+    addToShared: "Add to Shared Collections",
+    acceptSuccess: "Invitation accepted",
+    acceptError: "Could not accept invitation. Try again.",
     linkCount_one: "{{count}} link",
     linkCount_other: "{{count}} links",
     subcollectionCount_one: "{{count}} subcollection",
     subcollectionCount_other: "{{count}} subcollections",
+  },
+
+  savedCollections: {
+    save: "Save",
+    saved: "Saved",
+    saveCardTitle: "Save this collection",
+    saveCardSubtitle:
+      "Add it to your saved collections to find it again later.",
+    savedCardTitle: "Saved to your collections",
+    savedCardSubtitle:
+      "You can find it in your saved collections any time.",
+    saveSuccess: "Collection saved",
+    unsaveSuccess: "Removed from saved",
+    saveError: "Could not save collection. Try again.",
+    unsaveError: "Could not remove from saved. Try again.",
   },
 
   linkOptions: {

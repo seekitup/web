@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -14,8 +14,11 @@ import type { ResultsViewSection } from "@/components/search/ResultsView";
 import { useResultsViewMode } from "@/hooks/useResultsViewMode";
 import { useViewOptions } from "@/hooks/useViewOptions";
 import { useInfiniteCollections } from "@/hooks/useInfiniteCollections";
+import { useAuth } from "@/hooks/useAuth";
 import { useCreateModal } from "@/components/create/createModalContext";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { EntityActionKebab } from "@/components/collection/EntityActionKebab";
+import { CollectionOptionsModal } from "@/components/collection/CollectionOptionsModal";
 import { CollectionsIcon } from "@/components/layout/nav/icons";
 import type { CollectionsFilter } from "@/lib/viewOptionsStorage";
 import type { CollectionResponseDto } from "@/types/api";
@@ -30,6 +33,10 @@ export function CollectionsPage() {
     setCollectionsSortBy,
   } = useViewOptions();
   const [viewMode, setViewMode] = useResultsViewMode("grid");
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  const [collectionOptionsTarget, setCollectionOptionsTarget] =
+    useState<CollectionResponseDto | null>(null);
 
   const {
     items,
@@ -56,6 +63,7 @@ export function CollectionsPage() {
     { value: "my", label: t("collectionsScreen.filterMy") },
     { value: "invited", label: t("collectionsScreen.filterInvited") },
     { value: "pending", label: t("collectionsScreen.filterPending") },
+    { value: "saved", label: t("collectionsScreen.filterSaved") },
   ];
 
   const openCreate = () =>
@@ -73,6 +81,16 @@ export function CollectionsPage() {
     filter: collectionsFilter,
     onCta: openCreate,
   });
+
+  const optionsAriaLabel = t("collectionHero.openOptions");
+  const renderCollectionActions = isAuthenticated
+    ? (collection: CollectionResponseDto) => (
+        <EntityActionKebab
+          ariaLabel={optionsAriaLabel}
+          onOpen={() => setCollectionOptionsTarget(collection)}
+        />
+      )
+    : undefined;
 
   return (
     <>
@@ -143,6 +161,7 @@ export function CollectionsPage() {
                 onClick: openCreate,
               },
             }}
+            {...(renderCollectionActions ? { renderCollectionActions } : {})}
           />
         )}
 
@@ -152,6 +171,14 @@ export function CollectionsPage() {
           fetchNextPage={fetchNextPage}
         />
       </div>
+
+      {isAuthenticated ? (
+        <CollectionOptionsModal
+          isOpen={!!collectionOptionsTarget}
+          collection={collectionOptionsTarget}
+          onClose={() => setCollectionOptionsTarget(null)}
+        />
+      ) : null}
     </>
   );
 }
@@ -181,6 +208,15 @@ function buildEmptyState({
         icon={icon}
         title={t("collectionsScreen.emptyPendingTitle")}
         subtitle={t("collectionsScreen.emptyPendingSubtitle")}
+      />
+    );
+  }
+  if (filter === "saved") {
+    return (
+      <ListEmptyState
+        icon={icon}
+        title={t("collectionsScreen.emptySavedTitle")}
+        subtitle={t("collectionsScreen.emptySavedSubtitle")}
       />
     );
   }

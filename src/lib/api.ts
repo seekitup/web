@@ -289,6 +289,15 @@ export const collectionsApi = {
     );
     return response.data;
   },
+  listMembers: async (
+    id: number,
+    params?: { page?: number; limit?: number },
+  ): Promise<PaginatedResponse<CollectionMemberResponseDto>> => {
+    const response = await apiClient.get(`/api/v1/collections/${id}/members`, {
+      params,
+    });
+    return response.data;
+  },
   delete: async (id: number): Promise<void> => {
     await apiClient.delete(`/api/v1/collections/${id}`);
   },
@@ -304,6 +313,24 @@ export const collectionsApi = {
   },
   removeMember: async (id: number, memberId: number): Promise<void> => {
     await apiClient.delete(`/api/v1/collections/${id}/members/${memberId}`);
+  },
+  acceptInvitation: async (
+    id: number,
+  ): Promise<CollectionMemberResponseDto> => {
+    const response = await apiClient.post(
+      `/api/v1/collections/${id}/members/accept`,
+    );
+    return response.data;
+  },
+  saveCollection: async (id: number): Promise<void> => {
+    await apiClient.post(`/api/v1/collections/${id}/save`);
+  },
+  unsaveCollection: async (id: number): Promise<void> => {
+    await apiClient.delete(`/api/v1/collections/${id}/save`);
+  },
+  isCollectionSaved: async (id: number): Promise<{ saved: boolean }> => {
+    const response = await apiClient.get(`/api/v1/collections/${id}/saved`);
+    return response.data;
   },
   updateMemberRole: async (
     id: number,

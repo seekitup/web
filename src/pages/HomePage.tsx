@@ -56,9 +56,9 @@ export function HomePage() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Authenticated visitors at "/" go straight to /account (placeholder for future /home).
+  // Authenticated visitors at "/" go straight to /home
   if (!isLoading && isAuthenticated) {
-    return <Navigate to="/account" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return (

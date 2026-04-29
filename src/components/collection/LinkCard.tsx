@@ -71,6 +71,39 @@ export function LinkCard({
     onVisibilityChange(link.id, inView);
   }, [inView, link.id, onVisibilityChange]);
 
+  // Card-level click navigation. We render the wrapper as a div (not an <a>)
+  // so inner buttons (carousel arrows, mute toggle, action slot) can be
+  // clicked without triggering anchor navigation. preventDefault on the
+  // anchor proved unreliable across browsers/framer-motion, so we navigate
+  // imperatively and skip when the click originated on an inner button.
+  const handleCardClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if ((e.target as Element | null)?.closest("button")) return;
+      window.open(link.url, "_blank", "noopener,noreferrer");
+    },
+    [link.url],
+  );
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      if ((e.target as Element | null)?.closest("button")) return;
+      e.preventDefault();
+      window.open(link.url, "_blank", "noopener,noreferrer");
+    },
+    [link.url],
+  );
+  // Middle-click (button 1) opens in a new tab natively on <a>, so we
+  // emulate it on the div wrapper.
+  const handleCardAuxClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (e.button !== 1) return;
+      if ((e.target as Element | null)?.closest("button")) return;
+      e.preventDefault();
+      window.open(link.url, "_blank", "noopener,noreferrer");
+    },
+    [link.url],
+  );
+
   const title = getLinkDisplayTitle(link);
   const favicon = getLinkFavicon(link);
   const sourceText = getLinkSourceText(link);
@@ -253,7 +286,7 @@ export function LinkCard({
                 e.stopPropagation();
                 scrollTo(activeIndex + 1);
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors z-10"
             >
               <svg
                 width="14"
@@ -441,14 +474,17 @@ export function LinkCard({
   }
 
   return (
-    <motion.a
+    <motion.div
       ref={cardRef}
       data-item-id={itemId}
       {...motionProps}
-      href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group relative"
+      role="link"
+      tabIndex={0}
+      aria-label={title}
+      onClick={handleCardClick}
+      onAuxClick={handleCardAuxClick}
+      onKeyDown={handleCardKeyDown}
+      className="block bg-surface rounded-xl overflow-hidden transition-all duration-200 no-underline group relative cursor-pointer"
     >
       {mediaSection}
       {contentSection}
@@ -463,6 +499,6 @@ export function LinkCard({
           {actionSlot}
         </span>
       ) : null}
-    </motion.a>
+    </motion.div>
   );
 }

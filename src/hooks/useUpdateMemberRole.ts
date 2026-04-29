@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 import type {
   CollectionMemberResponseDto,
   UpdateMemberRoleDto,
@@ -17,8 +18,7 @@ export function useUpdateMemberRole() {
     mutationFn: ({ collectionId, memberId, data }) =>
       api.collections.updateMemberRole(collectionId, memberId, data),
     onSuccess: (_, { collectionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      invalidateCollection(queryClient, collectionId);
     },
   });
 }

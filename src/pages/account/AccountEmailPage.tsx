@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { BackButton } from "@/components/auth/BackButton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { getApiErrorMessage } from "@/lib/apiError";
 
@@ -41,17 +42,13 @@ export function AccountEmailPage() {
       <Helmet>
         <title>{t("accountEmailScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-text">
-          {t("accountEmailScreen.title")}
-        </h1>
-        <p className="mt-1 text-text-dim">
-          {t("accountEmailScreen.subtitle")}
-        </p>
-      </header>
+      <PageHeader
+        leading={<BackButton to="/account" />}
+        title={t("accountEmailScreen.title")}
+        subtitle={t("accountEmailScreen.subtitle")}
+      />
 
-      <div className="rounded-2xl border border-neutral-800 bg-surface p-5">
+      <div className="mt-6 rounded-2xl border border-neutral-800 bg-surface p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-sm text-text-dim">

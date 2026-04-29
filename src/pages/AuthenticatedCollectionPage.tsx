@@ -3,37 +3,37 @@ import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 import { useCollectionLookup } from "@/hooks/useCollectionLookup";
 import { useInvitationLookup } from "@/hooks/useInvitationLookup";
 import {
   useCollectionLinks,
   flattenCollectionLinks,
 } from "@/hooks/useCollectionLinks";
-import { useVisibleLinkTracker } from "@/hooks/useVisibleLinkTracker";
+import { usePublicLinks } from "@/hooks/usePublicLinks";
 import { useResultsViewMode } from "@/hooks/useResultsViewMode";
 import { useAuth } from "@/hooks/useAuth";
+import { useAcceptInvitation } from "@/hooks/useAcceptInvitation";
 import { CollectionLoader } from "@/components/collection/CollectionLoader";
 import { CollectionHeroBanner } from "@/components/collection/CollectionHeroBanner";
 import { CollectionToolbar } from "@/components/collection/CollectionToolbar";
 import { CollectionOptionsModal } from "@/components/collection/CollectionOptionsModal";
 import { LinkOptionsModal } from "@/components/collection/LinkOptionsModal";
-import { LinkCard } from "@/components/collection/LinkCard";
-import { CompactLinkCard } from "@/components/collection/CompactLinkCard";
-import { MiniLinkRow } from "@/components/search/MiniLinkRow";
-import { MiniCollectionRow } from "@/components/search/MiniCollectionRow";
-import { GridCollectionCard } from "@/components/search/GridCollectionCard";
+import { EntityActionKebab } from "@/components/collection/EntityActionKebab";
+import { PendingInvitationBanner } from "@/components/collection/PendingInvitationBanner";
+import { SaveCollectionBanner } from "@/components/collection/SaveCollectionBanner";
+import { ResultsView } from "@/components/search/ResultsView";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { InvitationLanding } from "@/components/invite/InvitationLanding";
-import { IconButton } from "@/components/ui/IconButton";
-import { MoreIcon } from "@/components/ui/icons";
 import { SetOutletWidth } from "@/components/layout/OutletWidth";
 import { useCreateModal } from "@/components/create/createModalContext";
 import { getCollectionShareUrl, shareUrl } from "@/lib/share";
+import { getApiErrorMessage } from "@/lib/apiError";
 import { getLinkPrimaryMedia } from "@/lib/linkUtils";
-import { useNavigate } from "react-router-dom";
 import type {
   CollectionLookupResponseDto,
   CollectionResponseDto,
+  CollectionRoleUserDto,
   LinkResponseDto,
   LookupChildCollectionDto,
 } from "@/types/api";
@@ -64,9 +64,14 @@ function adaptChildToCollection(
     updatedAt: new Date().toISOString(),
     user: parent.user as unknown as CollectionResponseDto["user"],
     members: [],
-    links: [],
+    // Cast preview links into the heavy DTO shape — `fromCollectionResponse`
+    // (used by the shared subcollection cards inside ResultsView) reads only
+    // a subset of fields that LookupPreviewLinkDto already covers, so the
+    // structural overlap is sufficient for previews to render.
+    links: child.previewLinks as unknown as CollectionResponseDto["links"],
     totalLinks: child.totalLinks,
     childCollections: [],
+    isSaved: false,
   };
 }
 
@@ -94,25 +99,39 @@ function adaptLookupToCollection(
     updatedAt: new Date().toISOString(),
     user: lookup.user as unknown as CollectionResponseDto["user"],
     members: lookup.members.map((m) => ({
-      id: m.id,
-      username: m.username,
-      roleName: "editor" as const,
-      image: m.image
-        ? ({
-            id: m.image.id,
-            url: m.image.url,
-          } as unknown as CollectionResponseDto["members"][number]["image"])
-        : undefined,
+      id: 0,
+      userId: m.id,
+      roleId: 0,
+      role: { id: 0, name: "editor" as const, displayName: "Editor" },
+      user: {
+        id: m.id,
+        username: m.username,
+        image: m.image ? { id: m.image.id, url: m.image.url } : undefined,
+      },
+      createdAt: new Date().toISOString(),
     })) as unknown as CollectionResponseDto["members"],
+    isSaved: false,
     links: [],
     totalLinks: lookup.totalLinks,
     childCollections: lookup.childCollections,
+    ...(lookup.userRole
+      ? {
+          userRole: {
+            id: lookup.userRole.id,
+            userId: lookup.user.id,
+            roleId: lookup.userRole.roleId,
+            role: lookup.userRole.role,
+            user: lookup.user as unknown as CollectionResponseDto["user"],
+            acceptedAt: lookup.userRole.acceptedAt ?? null,
+            createdAt: lookup.userRole.createdAt,
+          } as unknown as CollectionRoleUserDto,
+        }
+      : {}),
   };
 }
 
 export function AuthenticatedCollectionPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id;
   const { username = "", slug = "" } = useParams<{
@@ -128,8 +147,12 @@ export function AuthenticatedCollectionPage() {
     useState<LinkResponseDto | null>(null);
   const [childOptionsTarget, setChildOptionsTarget] =
     useState<CollectionResponseDto | null>(null);
+  // Local flag so the banner disappears immediately on accept, even before the
+  // refetched lookup arrives with `userRole.acceptedAt` populated.
+  const [invitationAccepted, setInvitationAccepted] = useState(false);
 
   const createModal = useCreateModal();
+  const acceptInvitation = useAcceptInvitation();
 
   // Invitation flow — same as the public page; auth users still see the
   // landing component (and can act on it from there).
@@ -154,14 +177,31 @@ export function AuthenticatedCollectionPage() {
     [lookup],
   );
 
-  // Authenticated collection-scoped link list — the backend honours role.
+  // Membership decides whether to hit the auth endpoint (sees private links the
+  // user has access to) or the public endpoint (returns the canonical public set).
+  // We can't rely on the auth endpoint alone: for non-member viewers of a public
+  // collection it returns nothing, leaving the page blank even though the public
+  // page would render the same links fine.
+  const isOwnerOrMember = useMemo(() => {
+    if (!lookup || !userId) return false;
+    if (lookup.user.id === userId) return true;
+    return lookup.members.some((m) => m.id === userId);
+  }, [lookup, userId]);
+
+  const authLinksQuery = useCollectionLinks(
+    isOwnerOrMember ? collection?.id : undefined,
+  );
+  const publicLinksQuery = usePublicLinks(
+    isOwnerOrMember ? undefined : collection?.id,
+  );
+  const linksQuery = isOwnerOrMember ? authLinksQuery : publicLinksQuery;
   const {
     data: linksData,
     isLoading: linksLoading,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useCollectionLinks(collection?.id);
+  } = linksQuery;
 
   const links = useMemo(
     () => flattenCollectionLinks(linksData?.pages),
@@ -173,12 +213,10 @@ export function AuthenticatedCollectionPage() {
     if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const { visibleLinkId, handleVisibilityChange } = useVisibleLinkTracker();
-
   const childCollections = useMemo(
     () =>
-      (lookup?.childCollections ?? []).map((c) =>
-        adaptChildToCollection(c, lookup!),
+      (lookup?.childCollections ?? []).map((child) =>
+        adaptChildToCollection(child, lookup!),
       ),
     [lookup],
   );
@@ -216,6 +254,51 @@ export function AuthenticatedCollectionPage() {
       preselectedCollectionId: collection.id,
     });
   }, [collection, createModal]);
+
+  // Pending-invitation banner — mirrors the mobile CollectionScreen flow.
+  // The viewer sees the banner when their RoleUser exists but acceptedAt is
+  // still null. Owners never see it.
+  const isPendingInvitation = useMemo(() => {
+    if (!lookup || !userId || invitationAccepted) return false;
+    if (lookup.user.id === userId) return false;
+    return !!lookup.userRole?.id && !lookup.userRole.acceptedAt;
+  }, [lookup, userId, invitationAccepted]);
+
+  // Save banner — visible to authenticated viewers of a public collection who
+  // have no membership at all (mirrors the mobile `shouldShowSaveButton`).
+  // Mutually exclusive with `isPendingInvitation` because that branch implies
+  // a `userRole` row exists.
+  const shouldShowSaveBanner = useMemo(() => {
+    if (!lookup || !userId) return false;
+    if (!lookup.isPublic) return false;
+    if (lookup.user.id === userId) return false;
+    if (lookup.userRole) return false;
+    return true;
+  }, [lookup, userId]);
+
+  const ownerForBanner = useMemo(() => {
+    if (!lookup) return null;
+    return {
+      id: lookup.user.id,
+      username: lookup.user.username,
+      firstName: lookup.user.firstName,
+      lastName: lookup.user.lastName,
+      image: lookup.user.image
+        ? { id: lookup.user.image.id, url: lookup.user.image.url }
+        : null,
+    };
+  }, [lookup]);
+
+  const handleAcceptInvitation = useCallback(async () => {
+    if (!collection) return;
+    try {
+      await acceptInvitation.mutateAsync(collection.id);
+      setInvitationAccepted(true);
+      toast.success(t("collectionOptions.acceptSuccess"));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, t("collectionOptions.acceptError")));
+    }
+  }, [collection, acceptInvitation, t]);
 
   // ── early-return branches mirror the public page ──────────────────
 
@@ -337,65 +420,99 @@ export function AuthenticatedCollectionPage() {
           onOpenOptions={() => setCollectionOptionsOpen(true)}
         />
 
-        <CollectionToolbar mode={mode} onModeChange={setMode} />
+        <CollectionToolbar
+          mode={mode}
+          onModeChange={setMode}
+          collectionName={collection.name}
+        />
+
+        {isPendingInvitation && ownerForBanner ? (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-4">
+            <PendingInvitationBanner
+              owner={ownerForBanner}
+              onAccept={handleAcceptInvitation}
+              isAccepting={acceptInvitation.isPending}
+            />
+          </div>
+        ) : shouldShowSaveBanner ? (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-4">
+            <SaveCollectionBanner collectionId={collection.id} />
+          </div>
+        ) : null}
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
-          {childCollections.length > 0 ? (
-            <section className="mb-8">
-              <h2 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-text-dim mb-3 px-1">
-                {t("childCollections.title")}
-              </h2>
-              <ChildList
-                mode={mode}
-                children={childCollections}
-                onOpenOptions={(c) => setChildOptionsTarget(c)}
-                onClick={(c) =>
-                  navigate(`/${lookup.user.username}/${c.slug}`)
-                }
+          <ResultsView
+            mode={mode}
+            onModeChange={setMode}
+            hideToggle
+            sections={[
+              ...(childCollections.length > 0
+                ? [
+                    {
+                      key: "collections",
+                      type: "collections" as const,
+                      title: t("childCollections.title"),
+                      items: childCollections,
+                    },
+                  ]
+                : []),
+              ...(links.length > 0
+                ? [
+                    {
+                      key: "links",
+                      type: "links" as const,
+                      title: "",
+                      items: links,
+                    },
+                  ]
+                : []),
+            ]}
+            onLinkClick={(link) =>
+              window.open(link.url, "_blank", "noopener")
+            }
+            renderLinkActions={(link) => (
+              <EntityActionKebab
+                ariaLabel={t("collectionHero.openOptions")}
+                onOpen={() => setLinkOptionsTarget(link)}
               />
-            </section>
-          ) : null}
-
-          <section>
-            {linksLoading ? (
-              <CollectionLoader className="py-16" />
-            ) : links.length === 0 ? (
+            )}
+            renderCollectionActions={(c) => (
+              <EntityActionKebab
+                ariaLabel={t("collectionHero.openOptions")}
+                onOpen={() => setChildOptionsTarget(c)}
+              />
+            )}
+            loading={linksLoading}
+            skeleton={<CollectionLoader className="py-16" />}
+            emptyState={
               <div className="px-4 py-16 text-center">
                 <p className="text-neutral-500 text-sm">
                   {t("collectionPage.emptyLinks")}
                 </p>
               </div>
-            ) : (
-              <LinkList
-                mode={mode}
-                links={links}
-                visibleLinkId={visibleLinkId}
-                onVisibilityChange={handleVisibilityChange}
-                onOpenOptions={(l) => setLinkOptionsTarget(l)}
-              />
-            )}
+            }
+          />
 
-            {hasNextPage && (
-              <div ref={loadMoreRef} className="flex justify-center py-8">
-                {isFetchingNextPage && (
-                  <div className="flex gap-1">
-                    <div
-                      className="w-2 h-2 rounded-full bg-primary animate-bounce"
-                      style={{ animationDelay: "0ms" }}
-                    />
-                    <div
-                      className="w-2 h-2 rounded-full bg-primary animate-bounce"
-                      style={{ animationDelay: "150ms" }}
-                    />
-                    <div
-                      className="w-2 h-2 rounded-full bg-primary animate-bounce"
-                      style={{ animationDelay: "300ms" }}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
+          {hasNextPage && (
+            <div ref={loadMoreRef} className="flex justify-center py-8">
+              {isFetchingNextPage && (
+                <div className="flex gap-1">
+                  <div
+                    className="w-2 h-2 rounded-full bg-primary animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <div
+                    className="w-2 h-2 rounded-full bg-primary animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <div
+                    className="w-2 h-2 rounded-full bg-primary animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="h-8" />
         </div>
@@ -424,139 +541,3 @@ export function AuthenticatedCollectionPage() {
   );
 }
 
-// ────────────────────────────────────────────────────────────────────
-// Mode-specific renderers
-// ────────────────────────────────────────────────────────────────────
-
-function ChildList({
-  mode,
-  children,
-  onOpenOptions,
-  onClick,
-}: {
-  mode: "compact" | "grid" | "complete";
-  children: CollectionResponseDto[];
-  onOpenOptions: (c: CollectionResponseDto) => void;
-  onClick: (c: CollectionResponseDto) => void;
-}) {
-  const { t } = useTranslation();
-  const renderKebab = (target: CollectionResponseDto) => (
-    <IconButton
-      variant="glass"
-      size={32}
-      aria-label={t("collectionHero.openOptions")}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onOpenOptions(target);
-      }}
-    >
-      <MoreIcon size={14} />
-    </IconButton>
-  );
-
-  if (mode === "compact") {
-    return (
-      <ul className="flex flex-col">
-        {children.map((c) => (
-          <li key={c.id}>
-            <MiniCollectionRow
-              collection={c}
-              onClick={onClick}
-              actionSlot={renderKebab(c)}
-            />
-          </li>
-        ))}
-      </ul>
-    );
-  }
-  // grid + complete both render in a grid for collections (matches mobile)
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {children.map((c, i) => (
-        <GridCollectionCard
-          key={c.id}
-          collection={c}
-          index={i}
-          onClick={onClick}
-          actionSlot={renderKebab(c)}
-        />
-      ))}
-    </div>
-  );
-}
-
-function LinkList({
-  mode,
-  links,
-  visibleLinkId,
-  onVisibilityChange,
-  onOpenOptions,
-}: {
-  mode: "compact" | "grid" | "complete";
-  links: LinkResponseDto[];
-  visibleLinkId: number | null;
-  onVisibilityChange: (id: number, inView: boolean) => void;
-  onOpenOptions: (link: LinkResponseDto) => void;
-}) {
-  const { t } = useTranslation();
-  const renderKebab = (link: LinkResponseDto) => (
-    <IconButton
-      variant="glass"
-      size={32}
-      aria-label={t("collectionHero.openOptions")}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onOpenOptions(link);
-      }}
-    >
-      <MoreIcon size={14} />
-    </IconButton>
-  );
-
-  if (mode === "compact") {
-    return (
-      <ul className="flex flex-col">
-        {links.map((link) => (
-          <li key={link.id}>
-            <MiniLinkRow
-              link={link}
-              onClick={() => window.open(link.url, "_blank", "noopener")}
-              actionSlot={renderKebab(link)}
-            />
-          </li>
-        ))}
-      </ul>
-    );
-  }
-  if (mode === "grid") {
-    return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {links.map((link, i) => (
-          <CompactLinkCard
-            key={link.id}
-            link={link}
-            index={i}
-            actionSlot={renderKebab(link)}
-          />
-        ))}
-      </div>
-    );
-  }
-  // complete
-  return (
-    <div className="space-y-4 max-w-2xl mx-auto">
-      {links.map((link, i) => (
-        <LinkCard
-          key={link.id}
-          link={link}
-          index={i}
-          isVisible={link.id === visibleLinkId}
-          onVisibilityChange={onVisibilityChange}
-          actionSlot={renderKebab(link)}
-        />
-      ))}
-    </div>
-  );
-}

@@ -140,3 +140,22 @@ export const CollectionIcon = (p: IconProps) => (
     <path d="M3 9h18 M8 3v6 M3 14h18 M3 19h18" />
   </svg>
 );
+
+export const MailIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="M3 7l9 6 9-6" />
+  </svg>
+);
+
+export const BookmarkIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+export const BookmarkFilledIcon = (p: IconProps) => (
+  <svg {...base(p)} fill="currentColor">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);

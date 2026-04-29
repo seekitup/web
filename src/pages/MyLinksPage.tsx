@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -13,10 +13,14 @@ import type { ResultsViewSection } from "@/components/search/ResultsView";
 import { useResultsViewMode } from "@/hooks/useResultsViewMode";
 import { useViewOptions } from "@/hooks/useViewOptions";
 import { useInfiniteLinks } from "@/hooks/useInfiniteLinks";
+import { useAuth } from "@/hooks/useAuth";
 import { useCreateModal } from "@/components/create/createModalContext";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { EntityActionKebab } from "@/components/collection/EntityActionKebab";
+import { LinkOptionsModal } from "@/components/collection/LinkOptionsModal";
 import { LinksIcon } from "@/components/layout/nav/icons";
 import type { LinksFilter } from "@/lib/viewOptionsStorage";
+import type { LinkResponseDto } from "@/types/api";
 
 export function MyLinksPage() {
   const { t } = useTranslation();
@@ -28,6 +32,10 @@ export function MyLinksPage() {
     setLinksVisibility,
   } = useViewOptions();
   const [viewMode, setViewMode] = useResultsViewMode("grid");
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  const [linkOptionsTarget, setLinkOptionsTarget] =
+    useState<LinkResponseDto | null>(null);
 
   const {
     items,
@@ -65,6 +73,16 @@ export function MyLinksPage() {
     hasVisibilityFilter: !!linksVisibility,
     onCta: openCreate,
   });
+
+  const optionsAriaLabel = t("collectionHero.openOptions");
+  const renderLinkActions = isAuthenticated
+    ? (link: LinkResponseDto) => (
+        <EntityActionKebab
+          ariaLabel={optionsAriaLabel}
+          onOpen={() => setLinkOptionsTarget(link)}
+        />
+      )
+    : undefined;
 
   return (
     <>
@@ -137,6 +155,7 @@ export function MyLinksPage() {
                 onClick: openCreate,
               },
             }}
+            {...(renderLinkActions ? { renderLinkActions } : {})}
           />
         )}
 
@@ -146,6 +165,15 @@ export function MyLinksPage() {
           fetchNextPage={fetchNextPage}
         />
       </div>
+
+      {isAuthenticated ? (
+        <LinkOptionsModal
+          isOpen={!!linkOptionsTarget}
+          link={linkOptionsTarget}
+          context="mylinks"
+          onClose={() => setLinkOptionsTarget(null)}
+        />
+      ) : null}
     </>
   );
 }

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
 import { BackButton } from "@/components/auth/BackButton";
-import { AccountPageHeader } from "@/components/account/SettingsSection";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { LanguagePicker } from "@/components/account/LanguagePicker";
 import type { Language } from "@/components/account/languages";
 import { useLanguage, type SupportedLanguage } from "@/hooks/useLanguage";
@@ -32,18 +32,20 @@ export function AccountLanguagePage() {
       <Helmet>
         <title>{t("accountLanguageScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <AccountPageHeader
+      <PageHeader
+        leading={<BackButton to="/account" />}
         title={t("accountLanguageScreen.title")}
         subtitle={t("accountLanguageScreen.subtitle")}
       />
 
-      <LanguagePicker
-        selectedCode={currentLanguage}
-        onSelect={onSelect}
-        isLoading={isChanging}
-        changingCode={pendingCode}
-      />
+      <div className="mt-6">
+        <LanguagePicker
+          selectedCode={currentLanguage}
+          onSelect={onSelect}
+          isLoading={isChanging}
+          changingCode={pendingCode}
+        />
+      </div>
     </>
   );
 }

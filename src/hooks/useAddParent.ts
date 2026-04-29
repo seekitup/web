@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 
 interface AddParentVars {
   collectionId: number;
@@ -12,11 +13,8 @@ export function useAddParent() {
     mutationFn: ({ collectionId, parentCollectionId }) =>
       api.collections.addParent(collectionId, parentCollectionId),
     onSuccess: (_, { collectionId, parentCollectionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({
-        queryKey: ["collection", parentCollectionId],
-      });
+      invalidateCollection(queryClient, collectionId);
+      invalidateCollection(queryClient, parentCollectionId);
     },
   });
 }

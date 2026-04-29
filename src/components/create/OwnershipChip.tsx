@@ -12,6 +12,7 @@ const LABEL_KEY: Record<OwnershipChipProps["ownership"], string> = {
   collaborative: "ownership.collaborative",
   shared: "ownership.shared",
   saved: "ownership.saved",
+  pending: "ownership.pending",
 };
 
 const TONE: Record<OwnershipChipProps["ownership"], string> = {
@@ -19,6 +20,7 @@ const TONE: Record<OwnershipChipProps["ownership"], string> = {
   collaborative: "bg-violet-500/15 text-violet-300 border-violet-400/30",
   shared: "bg-violet-500/15 text-violet-300 border-violet-400/30",
   saved: "bg-accent/15 text-accent border-accent/30",
+  pending: "bg-amber-500/15 text-amber-300 border-amber-400/30",
 };
 
 export function OwnershipChip({ ownership, className }: OwnershipChipProps) {

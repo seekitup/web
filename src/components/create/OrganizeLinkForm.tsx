@@ -1,13 +1,16 @@
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { Spinner } from "@/components/ui/Spinner";
-import { useLinks } from "@/hooks/useLinks";
+import { useInfiniteLinks } from "@/hooks/useInfiniteLinks";
 import { useUpdateLink } from "@/hooks/useUpdateLink";
 import { useCollections } from "@/hooks/useCollections";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { InfiniteScrollSentinel } from "@/components/list/InfiniteScrollSentinel";
+import type { LinkResponseDto } from "@/types/api";
 import { CollectionPickerDialog } from "./CollectionPickerDialog";
 import { CollectionPickerTrigger } from "./CollectionPickerTrigger";
 import { MiniLink } from "./MiniLink";
@@ -20,14 +23,29 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
   const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
-  const [linkIds, setLinkIds] = useState<Set<number>>(new Set());
+  // Track selected links as full objects, not just ids — the displayed list is
+  // paginated/searched, so a link the user picked may scroll out of the loaded
+  // pages by the time they submit. Snapshotting on toggle keeps the merge with
+  // existing `link.collections` correct regardless of current query state.
+  const [selectedLinks, setSelectedLinks] = useState<Map<number, LinkResponseDto>>(
+    new Map(),
+  );
   const [targetIds, setTargetIds] = useState<number[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const { data: links = [], isLoading } = useLinks({
+  const debouncedSearch = useDebouncedValue(search.trim(), 300);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const {
+    items: links,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteLinks({
     filter: "my",
-    limit: 100,
     sortBy: "createdAt",
+    search: debouncedSearch || undefined,
   });
   const { data: collections = [] } = useCollections({
     filter: "all",
@@ -35,20 +53,11 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
   });
   const updateLink = useUpdateLink();
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return links;
-    return links.filter((l) => {
-      const haystack = `${l.title} ${l.ogTitle ?? ""} ${l.domain}`.toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [links, search]);
-
-  const toggleLink = (id: number) => {
-    setLinkIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  const toggleLink = (link: LinkResponseDto) => {
+    setSelectedLinks((prev) => {
+      const next = new Map(prev);
+      if (next.has(link.id)) next.delete(link.id);
+      else next.set(link.id, link);
       return next;
     });
   };
@@ -60,17 +69,18 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
     ]);
   };
 
-  const isFormValid = linkIds.size > 0 && targetIds.length > 0;
+  const isFormValid = selectedLinks.size > 0 && targetIds.length > 0;
   const isSubmitting = updateLink.isPending;
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
-    const linksById = new Map(links.map((l) => [l.id, l]));
-    const promises = [...linkIds].map(async (id) => {
-      const link = linksById.get(id);
-      const existingIds = (link?.collections ?? []).map((c) => c.id);
+    const promises = [...selectedLinks.values()].map(async (link) => {
+      const existingIds = (link.collections ?? []).map((c) => c.id);
       const merged = Array.from(new Set([...existingIds, ...targetIds]));
-      return updateLink.mutateAsync({ id, data: { collectionIds: merged } });
+      return updateLink.mutateAsync({
+        id: link.id,
+        data: { collectionIds: merged },
+      });
     });
     try {
       const results = await Promise.allSettled(promises);
@@ -80,7 +90,7 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
         return;
       }
       toast.success(t("organizeLinkForm.success"));
-      setLinkIds(new Set());
+      setSelectedLinks(new Map());
       setTargetIds([]);
       onSuccess();
     } catch (error) {
@@ -139,30 +149,43 @@ export function OrganizeLinkForm({ onSuccess }: OrganizeLinkFormProps) {
           <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-text-dim">
             {t("organizeLinkForm.sectionLabel")}
           </p>
-          {linkIds.size > 0 ? (
+          {selectedLinks.size > 0 ? (
             <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-primary/15 px-2 text-[11px] font-semibold text-primary">
-              {linkIds.size}
+              {selectedLinks.size}
             </span>
           ) : null}
         </div>
-        <div className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto pr-1 -mr-1">
+        <div
+          ref={scrollRef}
+          className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto pr-1 -mr-1"
+        >
           {isLoading ? (
             <div className="flex justify-center py-6">
               <Spinner size={20} />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : links.length === 0 ? (
             <p className="py-6 text-center text-[14px] text-text-dim">
               {t("organizeLinkForm.noLinks")}
             </p>
           ) : (
-            filtered.map((l) => (
-              <MiniLink
-                key={l.id}
-                link={l}
-                isSelected={linkIds.has(l.id)}
-                onPress={() => toggleLink(l.id)}
+            <>
+              {links.map((l) => (
+                <MiniLink
+                  key={l.id}
+                  link={l}
+                  isSelected={selectedLinks.has(l.id)}
+                  onPress={() => toggleLink(l)}
+                />
+              ))}
+              <InfiniteScrollSentinel
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                fetchNextPage={fetchNextPage}
+                root={scrollRef.current}
+                rootMargin="120px 0px"
+                className="flex justify-center py-3"
               />
-            ))
+            </>
           )}
         </div>
 

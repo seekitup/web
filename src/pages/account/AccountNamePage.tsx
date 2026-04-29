@@ -6,9 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { BackButton } from "@/components/auth/BackButton";
-import {
-  AccountPageHeader,
-} from "@/components/account/SettingsSection";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useUpdateUser } from "@/hooks/useUpdateUser";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -54,13 +52,13 @@ export function AccountNamePage() {
       <Helmet>
         <title>{t("accountNameScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <AccountPageHeader
+      <PageHeader
+        leading={<BackButton to="/account" />}
         title={t("accountNameScreen.title")}
         subtitle={t("accountNameScreen.subtitle")}
       />
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-5" noValidate>
         <TextField
           label={t("accountNameScreen.firstName")}
           placeholder={t("accountNameScreen.firstNamePlaceholder")}

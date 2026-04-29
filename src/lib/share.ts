@@ -16,7 +16,7 @@ export function getCollectionShareUrl(
   const origin =
     typeof window !== "undefined" && window.location?.origin
       ? window.location.origin
-      : "https://seekitup.com";
+      : "https://www.seekitup.com";
   return `${origin}/${collection.user.username}/${collection.slug}`;
 }
 

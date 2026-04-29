@@ -12,6 +12,7 @@ import {
   SearchIcon,
 } from "./nav/icons";
 import { NAV_ITEMS } from "./nav/items";
+import { useIsCollectionDetail } from "./nav/useIsCollectionDetail";
 
 interface SidebarProps {
   /**
@@ -32,6 +33,7 @@ export function Sidebar({ onNewCollection }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { data: collections, isLoading } = useMyCollections({ limit: 8 });
+  const isCollectionDetail = useIsCollectionDetail();
 
   if (!user) return null;
 
@@ -43,7 +45,7 @@ export function Sidebar({ onNewCollection }: SidebarProps) {
   };
 
   return (
-    <aside className="hidden lg:flex sticky top-16 h-[calc(100vh-4rem)] w-[260px] xl:w-[280px] shrink-0 flex-col border-r border-neutral-800/70 bg-background/60 backdrop-blur-xl">
+    <aside className="hidden lg:flex sticky top-16 h-[calc(100vh/0.95-4rem)] w-[260px] xl:w-[280px] shrink-0 flex-col border-r border-neutral-800/70 bg-background/60 backdrop-blur-xl">
       {/* Primary nav */}
       <nav className="flex flex-col gap-1 px-3 pt-5">
         <NavLink
@@ -82,43 +84,50 @@ export function Sidebar({ onNewCollection }: SidebarProps) {
             </>
           )}
         </NavLink>
-        {NAV_ITEMS.map(({ to, labelKey, Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end ?? false}
-            className={({ isActive }) =>
-              clsx(
-                "group relative flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-medium transition-colors",
-                isActive
-                  ? "bg-primary/10 text-text"
-                  : "text-text-dim hover:bg-white/[0.04] hover:text-text",
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive ? (
-                  <span
-                    aria-hidden
-                    className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary"
-                  />
-                ) : null}
-                <Icon
-                  width={18}
-                  height={18}
-                  className={clsx(
-                    "shrink-0 transition-colors",
-                    isActive
-                      ? "text-primary"
-                      : "text-text-dim group-hover:text-text",
-                  )}
-                />
-                <span>{t(labelKey)}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map(({ to, labelKey, Icon, end }) => {
+          const forceActive = to === "/collections" && isCollectionDetail;
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              end={end ?? false}
+              className={({ isActive }) => {
+                const active = isActive || forceActive;
+                return clsx(
+                  "group relative flex items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-medium transition-colors",
+                  active
+                    ? "bg-primary/10 text-text"
+                    : "text-text-dim hover:bg-white/[0.04] hover:text-text",
+                );
+              }}
+            >
+              {({ isActive }) => {
+                const active = isActive || forceActive;
+                return (
+                  <>
+                    {active ? (
+                      <span
+                        aria-hidden
+                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary"
+                      />
+                    ) : null}
+                    <Icon
+                      width={18}
+                      height={18}
+                      className={clsx(
+                        "shrink-0 transition-colors",
+                        active
+                          ? "text-primary"
+                          : "text-text-dim group-hover:text-text",
+                      )}
+                    />
+                    <span>{t(labelKey)}</span>
+                  </>
+                );
+              }}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Recent collections */}
@@ -196,26 +205,69 @@ export function Sidebar({ onNewCollection }: SidebarProps) {
                 <ul className="flex flex-col gap-0.5">
                   {collections.map((c) => (
                     <li key={c.id}>
-                      <Link
+                      <NavLink
                         to={`/${c.user.username}/${c.slug}`}
-                        className="group/item relative flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.04]"
+                        className={({ isActive }) =>
+                          clsx(
+                            "group/item relative flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors",
+                            isActive
+                              ? "bg-primary/10"
+                              : "hover:bg-white/[0.04]",
+                          )
+                        }
                         title={c.name}
                       >
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-white/[0.05] to-white/[0.01] ring-1 ring-inset ring-white/[0.05] transition-all duration-200 group-hover/item:from-primary/12 group-hover/item:to-primary/[0.02] group-hover/item:ring-primary/25">
-                          <CollectionsIcon
-                            width={14}
-                            height={14}
-                            strokeWidth={1.8}
-                            className="text-text-dim/80 transition-colors group-hover/item:text-primary"
-                          />
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-[13.5px] text-text-dim transition-colors group-hover/item:text-text">
-                          {c.name}
-                        </span>
-                        <span className="shrink-0 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums text-text-dim/80 transition-colors group-hover/item:bg-primary/10 group-hover/item:text-primary">
-                          {c.totalLinks}
-                        </span>
-                      </Link>
+                        {({ isActive }) => (
+                          <>
+                            {isActive ? (
+                              <span
+                                aria-hidden
+                                className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r-full bg-primary"
+                              />
+                            ) : null}
+                            <span
+                              className={clsx(
+                                "flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br ring-1 ring-inset transition-all duration-200",
+                                isActive
+                                  ? "from-primary/20 to-primary/[0.04] ring-primary/30"
+                                  : "from-white/[0.05] to-white/[0.01] ring-white/[0.05] group-hover/item:from-primary/12 group-hover/item:to-primary/[0.02] group-hover/item:ring-primary/25",
+                              )}
+                            >
+                              <CollectionsIcon
+                                width={14}
+                                height={14}
+                                strokeWidth={1.8}
+                                className={clsx(
+                                  "transition-colors",
+                                  isActive
+                                    ? "text-primary"
+                                    : "text-text-dim/80 group-hover/item:text-primary",
+                                )}
+                              />
+                            </span>
+                            <span
+                              className={clsx(
+                                "min-w-0 flex-1 truncate text-[13.5px] transition-colors",
+                                isActive
+                                  ? "font-medium text-text"
+                                  : "text-text-dim group-hover/item:text-text",
+                              )}
+                            >
+                              {c.name}
+                            </span>
+                            <span
+                              className={clsx(
+                                "shrink-0 rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums transition-colors",
+                                isActive
+                                  ? "bg-primary/10 text-primary"
+                                  : "bg-white/[0.04] text-text-dim/80 group-hover/item:bg-primary/10 group-hover/item:text-primary",
+                              )}
+                            >
+                              {c.totalLinks}
+                            </span>
+                          </>
+                        )}
+                      </NavLink>
                     </li>
                   ))}
                 </ul>

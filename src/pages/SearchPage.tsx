@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSearch } from "@/hooks/useSearch";
+import { useAuth } from "@/hooks/useAuth";
 import { SetOutletWidth } from "@/components/layout/OutletWidth";
 import {
   FilterChips,
@@ -18,6 +19,9 @@ import { useResultsViewMode } from "@/hooks/useResultsViewMode";
 import { SearchEmptyState } from "@/components/search/SearchEmptyState";
 import { SearchSkeleton } from "@/components/search/SearchSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { EntityActionKebab } from "@/components/collection/EntityActionKebab";
+import { LinkOptionsModal } from "@/components/collection/LinkOptionsModal";
+import { CollectionOptionsModal } from "@/components/collection/CollectionOptionsModal";
 import type {
   CollectionResponseDto,
   LinkResponseDto,
@@ -72,6 +76,12 @@ export function SearchPage() {
   const [visibilityFilter, setVisibilityFilter] =
     useState<SearchVisibilityFilter>("all");
   const [viewMode, setViewMode] = useResultsViewMode("compact");
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  const [linkOptionsTarget, setLinkOptionsTarget] =
+    useState<LinkResponseDto | null>(null);
+  const [collectionOptionsTarget, setCollectionOptionsTarget] =
+    useState<CollectionResponseDto | null>(null);
 
   const filteredLinks = useMemo(() => {
     if (typeFilter === "collections") return [];
@@ -140,6 +150,24 @@ export function SearchPage() {
     },
     [setSearchText],
   );
+
+  const optionsAriaLabel = t("collectionHero.openOptions");
+  const renderLinkActions = isAuthenticated
+    ? (link: LinkResponseDto) => (
+        <EntityActionKebab
+          ariaLabel={optionsAriaLabel}
+          onOpen={() => setLinkOptionsTarget(link)}
+        />
+      )
+    : undefined;
+  const renderCollectionActions = isAuthenticated
+    ? (collection: CollectionResponseDto) => (
+        <EntityActionKebab
+          ariaLabel={optionsAriaLabel}
+          onOpen={() => setCollectionOptionsTarget(collection)}
+        />
+      )
+    : undefined;
 
   return (
     <>
@@ -224,9 +252,27 @@ export function SearchPage() {
             }
             onLinkClick={handleLinkClick}
             onCollectionClick={handleCollectionClick}
+            {...(renderLinkActions ? { renderLinkActions } : {})}
+            {...(renderCollectionActions ? { renderCollectionActions } : {})}
           />
         )}
       </div>
+
+      {isAuthenticated ? (
+        <>
+          <LinkOptionsModal
+            isOpen={!!linkOptionsTarget}
+            link={linkOptionsTarget}
+            context="home"
+            onClose={() => setLinkOptionsTarget(null)}
+          />
+          <CollectionOptionsModal
+            isOpen={!!collectionOptionsTarget}
+            collection={collectionOptionsTarget}
+            onClose={() => setCollectionOptionsTarget(null)}
+          />
+        </>
+      ) : null}
     </>
   );
 }

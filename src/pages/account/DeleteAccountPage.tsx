@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { BackButton } from "@/components/auth/BackButton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -46,17 +47,14 @@ export function DeleteAccountPage() {
       <Helmet>
         <title>{t("deleteAccountScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-danger">
-          {t("deleteAccountScreen.title")}
-        </h1>
-        <p className="mt-1 text-text-dim">
-          {t("deleteAccountScreen.subtitle")}
-        </p>
-      </header>
+      <PageHeader
+        leading={<BackButton to="/account" />}
+        title={t("deleteAccountScreen.title")}
+        subtitle={t("deleteAccountScreen.subtitle")}
+        tone="danger"
+      />
 
-      <div className="rounded-2xl border border-danger/30 bg-danger/5 p-5">
+      <div className="mt-6 rounded-2xl border border-danger/30 bg-danger/5 p-5">
         <ul className="flex flex-col gap-3">
           {[
             t("deleteAccountScreen.warning1"),

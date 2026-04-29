@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "@/components/ui/Modal";
 import { OptionRow } from "@/components/ui/OptionRow";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { QRCodeModal } from "@/components/ui/QRCodeModal";
 import { TextField } from "@/components/ui/TextField";
 import { Avatar } from "@/components/ui/Avatar";
 import {
@@ -17,6 +18,7 @@ import {
   UsersIcon,
   TrashIcon,
   LogOutIcon,
+  MailIcon,
 } from "@/components/ui/icons";
 import { useAuth } from "@/hooks/useAuth";
 import { useUpdateCollection } from "@/hooks/useUpdateCollection";
@@ -25,8 +27,8 @@ import { useDuplicateCollection } from "@/hooks/useDuplicateCollection";
 import { useLeaveCollection } from "@/hooks/useLeaveCollection";
 import { useUpdateCollectionParentVisibility } from "@/hooks/useUpdateCollectionParentVisibility";
 import { useRemoveMember } from "@/hooks/useRemoveMember";
-import { useUpdateMemberRole } from "@/hooks/useUpdateMemberRole";
 import { useInviteMember } from "@/hooks/useInviteMember";
+import { useCollectionMembers } from "@/hooks/useCollectionMembers";
 import {
   canManageMembers,
   canChangeVisibility,
@@ -38,10 +40,11 @@ import {
   getCollectionOwner,
   getUserDisplayName,
 } from "@/lib/permissions";
-import { getRelativeTime } from "@/lib/relativeTime";
 import { getCollectionShareUrl, shareUrl } from "@/lib/share";
 import { getApiErrorMessage } from "@/lib/apiError";
+import clsx from "clsx";
 import type {
+  CollectionMemberResponseDto,
   CollectionResponseDto,
   CollectionRoleUserDto,
 } from "@/types/api";
@@ -69,7 +72,8 @@ type SubModal =
   | { kind: "downgrade-with-collaborators-confirm" }
   | { kind: "delete-confirm" }
   | { kind: "leave-confirm" }
-  | { kind: "edit-editors" };
+  | { kind: "edit-editors" }
+  | { kind: "qr" };
 
 export function CollectionOptionsModal({
   isOpen,
@@ -108,6 +112,10 @@ export function CollectionOptionsModal({
   const canEditMembers = canManageMembers(collection, userId);
   const canDelete = canDeleteCollection(collection, userId);
   const canLeave = canLeaveCollection(collection, userId);
+  // Viewers of a private collection can't actually share — the existing
+  // "make public" prompt would dead-end for them — so hide the row entirely.
+  const canShare =
+    collection?.visibility !== "private" || canEditVisibility;
 
   // ── action handlers ──────────────────────────────────────────────
 
@@ -155,14 +163,9 @@ export function CollectionOptionsModal({
   }, [collection, onUpdated, t, updateCollection]);
 
   const handleQR = useCallback(() => {
-    // QR generation deferred to a follow-up to avoid an extra dependency;
-    // the share URL is at least copyable for now.
     if (!collection) return;
-    void navigator.clipboard
-      ?.writeText(getCollectionShareUrl(collection))
-      .catch(() => undefined);
-    toast(t("common.comingSoon"));
-  }, [collection, t]);
+    setSub({ kind: "qr" });
+  }, [collection]);
 
   const handleDelete = useCallback(() => {
     setSub({ kind: "delete-confirm" });
@@ -285,12 +288,14 @@ export function CollectionOptionsModal({
               onClick={() => setSub({ kind: "rename" })}
             />
           ) : null}
-          <OptionRow
-            icon={<ShareIcon />}
-            label={t("collectionOptions.share")}
-            onClick={handleShare}
-            loading={updateCollection.isPending}
-          />
+          {canShare ? (
+            <OptionRow
+              icon={<ShareIcon />}
+              label={t("collectionOptions.share")}
+              onClick={handleShare}
+              loading={updateCollection.isPending}
+            />
+          ) : null}
           <OptionRow
             icon={<QrIcon />}
             label={t("collectionOptions.qrCode")}
@@ -318,24 +323,27 @@ export function CollectionOptionsModal({
           {/* Select mode is gated identically to mobile (`selectMode` context).
               Web has no select-mode caller yet, so the row stays hidden. */}
 
-          <div className="h-px bg-white/[0.06] my-1.5" />
-
-          {canDelete ? (
-            <OptionRow
-              icon={<TrashIcon />}
-              tone="danger"
-              label={t("collectionOptions.delete")}
-              onClick={handleDelete}
-              loading={deleteCollection.isPending}
-            />
-          ) : canLeave ? (
-            <OptionRow
-              icon={<LogOutIcon />}
-              tone="danger"
-              label={t("collectionOptions.leaveCollection")}
-              onClick={handleLeave}
-              loading={leaveCollection.isPending}
-            />
+          {canDelete || canLeave ? (
+            <>
+              <div className="h-px bg-white/[0.06] my-1.5" />
+              {canDelete ? (
+                <OptionRow
+                  icon={<TrashIcon />}
+                  tone="danger"
+                  label={t("collectionOptions.delete")}
+                  onClick={handleDelete}
+                  loading={deleteCollection.isPending}
+                />
+              ) : (
+                <OptionRow
+                  icon={<LogOutIcon />}
+                  tone="danger"
+                  label={t("collectionOptions.leaveCollection")}
+                  onClick={handleLeave}
+                  loading={leaveCollection.isPending}
+                />
+              )}
+            </>
           ) : null}
         </div>
       </Modal>
@@ -395,7 +403,7 @@ export function CollectionOptionsModal({
           const hasNonOwnerCollabs =
             newVisibility === "private" &&
             collection.members?.some(
-              (m: CollectionRoleUserDto) => m.roleName !== "owner",
+              (m: CollectionRoleUserDto) => m.role?.name !== "owner",
             );
           if (hasNonOwnerCollabs) {
             setSub({ kind: "downgrade-with-collaborators-confirm" });
@@ -480,6 +488,14 @@ export function CollectionOptionsModal({
         collection={collection}
         onClose={() => setSub({ kind: "none" })}
         onChanged={() => onUpdated?.()}
+      />
+
+      <QRCodeModal
+        isOpen={isOpen && sub.kind === "qr"}
+        onClose={() => setSub({ kind: "none" })}
+        url={getCollectionShareUrl(collection)}
+        title={collection.name}
+        stacked
       />
     </>
   );
@@ -657,8 +673,8 @@ function EditEditorsSubModal({
 }) {
   const { t } = useTranslation();
   const removeMember = useRemoveMember();
-  const updateMemberRole = useUpdateMemberRole();
   const inviteMember = useInviteMember();
+  const membersQuery = useCollectionMembers(collection.id, isOpen);
 
   const [email, setEmail] = useState("");
 
@@ -667,34 +683,31 @@ function EditEditorsSubModal({
     if (!isOpen) setEmail("");
   }, [isOpen]);
 
-  const editableMembers = (collection.members ?? []).filter(
-    (m) => m.roleName !== "owner",
-  );
-
-  const handleRoleChange = useCallback(
-    async (memberId: number, next: "owner" | "editor") => {
-      try {
-        await updateMemberRole.mutateAsync({
-          collectionId: collection.id,
-          memberId,
-          data: { roleName: next },
-        });
-        onChanged();
-      } catch (err) {
-        toast.error(
-          getApiErrorMessage(err, t("collectionOptions.editEditorsError")),
-        );
-      }
-    },
-    [collection.id, onChanged, t, updateMemberRole],
-  );
+  const sortedMembers = useMemo(() => {
+    const list = membersQuery.data ?? [];
+    // Owner first, then accepted editors, then pending invitations.
+    return [...list].sort((a, b) => {
+      const rank = (m: typeof a) => {
+        if (m.role?.name === "owner") return 0;
+        if (m.acceptedAt) return 1;
+        return 2;
+      };
+      const ra = rank(a);
+      const rb = rank(b);
+      if (ra !== rb) return ra - rb;
+      return (
+        new Date(a.acceptedAt ?? 0).getTime() -
+        new Date(b.acceptedAt ?? 0).getTime()
+      );
+    });
+  }, [membersQuery.data]);
 
   const handleRemove = useCallback(
-    async (memberId: number) => {
+    async (userId: number) => {
       try {
         await removeMember.mutateAsync({
           collectionId: collection.id,
-          memberId,
+          memberId: userId,
         });
         onChanged();
       } catch (err) {
@@ -722,67 +735,53 @@ function EditEditorsSubModal({
     }
   }, [collection.id, email, inviteMember, onChanged, t]);
 
+  const [resendingId, setResendingId] = useState<number | null>(null);
+  const handleResend = useCallback(
+    async (member: CollectionMemberResponseDto) => {
+      const targetEmail = member.user?.email ?? member.invitedEmail;
+      if (!targetEmail) return;
+      setResendingId(member.id);
+      try {
+        await inviteMember.mutateAsync({
+          collectionId: collection.id,
+          data: { email: targetEmail, roleName: "editor" },
+        });
+        toast.success(t("collectionOptions.resendInviteSuccess"));
+        onChanged();
+      } catch (err) {
+        toast.error(
+          getApiErrorMessage(err, t("collectionOptions.resendInviteError")),
+        );
+      } finally {
+        setResendingId(null);
+      }
+    },
+    [collection.id, inviteMember, onChanged, t],
+  );
+
+  const isLoading = membersQuery.isLoading;
+  const isError = membersQuery.isError;
+  const showEmpty =
+    !isLoading && !isError && sortedMembers.filter((m) => m.role?.name !== "owner").length === 0;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={t("collectionOptions.editEditorsTitle")}
       stacked
-    >
-      <div className="px-5 pb-5">
-        {editableMembers.length === 0 ? (
-          <p className="text-sm text-text-dim py-6 text-center">
-            {t("collectionOptions.noEditorsYet")}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-1.5">
-            {editableMembers.map((m) => (
-              <li
-                key={m.id}
-                className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2.5"
-              >
-                <Avatar user={m} size={32} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-[14px] font-semibold text-text truncate">
-                    {getUserDisplayName(m)}
-                  </div>
-                  <div className="text-[12px] text-text-dim truncate">
-                    @{m.username}
-                  </div>
-                </div>
-                <select
-                  value={m.roleName}
-                  onChange={(e) =>
-                    void handleRoleChange(
-                      m.id,
-                      e.target.value as "owner" | "editor",
-                    )
-                  }
-                  disabled={updateMemberRole.isPending}
-                  className="bg-surface text-text text-[12px] rounded-full border border-neutral-700 px-2 py-1 cursor-pointer"
-                >
-                  <option value="editor">{t("roles.editor")}</option>
-                  <option value="owner">{t("roles.owner")}</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => void handleRemove(m.id)}
-                  disabled={removeMember.isPending}
-                  aria-label={t("collectionOptions.removeMember")}
-                  className="ml-1 h-8 w-8 inline-flex items-center justify-center rounded-full text-text-dim hover:bg-danger/15 hover:text-danger transition cursor-pointer"
-                >
-                  <TrashIcon size={14} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="mt-6">
+      footer={
+        <div>
           <label className="text-[12px] font-medium text-text-dim mb-2 block">
             {t("collectionOptions.inviteEditorLabel")}
           </label>
-          <div className="flex gap-2">
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleInvite();
+            }}
+          >
             <TextField
               type="email"
               value={email}
@@ -792,8 +791,7 @@ function EditEditorsSubModal({
               containerClassName="flex-1"
             />
             <button
-              type="button"
-              onClick={() => void handleInvite()}
+              type="submit"
               disabled={!email.trim() || inviteMember.isPending}
               className="px-4 py-2.5 rounded-full text-sm font-semibold bg-primary text-background hover:brightness-110 transition disabled:opacity-50 cursor-pointer"
             >
@@ -801,19 +799,176 @@ function EditEditorsSubModal({
                 ? t("common.loading")
                 : t("collectionOptions.inviteButton")}
             </button>
-          </div>
-          <p className="text-[11px] text-text-dim mt-2">
+          </form>
+          <p className="text-[11px] text-text-dim mt-2 break-all">
             {t("collectionOptions.shareableNote", {
               url: getCollectionShareUrl(collection),
             })}
           </p>
-          <p className="text-[10px] text-text-dim mt-3">
-            {t("collectionOptions.editorsCreatedRelative", {
-              time: getRelativeTime(collection.createdAt),
-            })}
-          </p>
         </div>
+      }
+    >
+      <div className="px-5 pb-4">
+        <div className="flex items-baseline justify-between mb-2.5">
+          <h3 className="text-[12px] font-semibold uppercase tracking-wide text-text-dim">
+            {t("collectionOptions.editorsSectionTitle")}
+          </h3>
+          {!isLoading && !isError ? (
+            <span className="text-[11px] text-text-dim">
+              {t("collectionOptions.editorsCount", {
+                count: sortedMembers.length,
+              })}
+            </span>
+          ) : null}
+        </div>
+
+        {isLoading ? (
+          <p className="text-sm text-text-dim py-6 text-center">
+            {t("collectionOptions.editorsLoading")}
+          </p>
+        ) : isError ? (
+          <p className="text-sm text-danger py-6 text-center">
+            {t("collectionOptions.editorsLoadError")}
+          </p>
+        ) : showEmpty && sortedMembers.length === 1 ? (
+          <>
+            <ul className="flex flex-col gap-1.5">
+              {sortedMembers.map((m) => (
+                <MemberRow
+                  key={m.id}
+                  member={m}
+                  canRemove={false}
+                  removing={removeMember.isPending}
+                  onRemove={() => {}}
+                  ownerLabel={t("collectionOptions.editorOwnerBadge")}
+                  pendingLabel={t("collectionOptions.editorPendingBadge")}
+                  removeLabel={t("collectionOptions.removeMember")}
+                />
+              ))}
+            </ul>
+            <p className="text-sm text-text-dim py-6 text-center">
+              {t("collectionOptions.noEditorsYet")}
+            </p>
+          </>
+        ) : (
+          <ul className="flex flex-col gap-1.5">
+            {sortedMembers.map((m) => (
+              <MemberRow
+                key={m.id}
+                member={m}
+                canRemove={m.role?.name !== "owner"}
+                removing={removeMember.isPending}
+                onRemove={() => void handleRemove(m.userId)}
+                onResend={() => void handleResend(m)}
+                isResending={resendingId === m.id}
+                ownerLabel={t("collectionOptions.editorOwnerBadge")}
+                pendingLabel={t("collectionOptions.editorPendingBadge")}
+                removeLabel={t("collectionOptions.removeMember")}
+                resendLabel={t("collectionOptions.resendInvite")}
+              />
+            ))}
+          </ul>
+        )}
       </div>
     </Modal>
+  );
+}
+
+function MemberRow({
+  member,
+  canRemove,
+  removing,
+  onRemove,
+  onResend,
+  isResending,
+  ownerLabel,
+  pendingLabel,
+  removeLabel,
+  resendLabel,
+}: {
+  member: CollectionMemberResponseDto;
+  canRemove: boolean;
+  removing: boolean;
+  onRemove: () => void;
+  onResend?: () => void;
+  isResending?: boolean;
+  ownerLabel: string;
+  pendingLabel: string;
+  removeLabel: string;
+  resendLabel?: string;
+}) {
+  const isOwner = member.role?.name === "owner";
+  const isPending = !isOwner && !member.acceptedAt;
+  const userForName = {
+    firstName: member.user?.firstName,
+    lastName: member.user?.lastName,
+    username: member.user?.username,
+  };
+  const subtitle = isPending
+    ? (member.user?.email ?? member.invitedEmail ?? `@${member.user?.username ?? ""}`)
+    : `@${member.user?.username ?? ""}`;
+
+  return (
+    <li
+      className={clsx(
+        "flex items-center gap-3 rounded-xl px-3 py-2.5 transition",
+        isPending ? "bg-white/[0.025]" : "bg-white/[0.04]",
+      )}
+    >
+      <Avatar
+        user={
+          member.user ?? {
+            id: member.userId,
+            username: "",
+          }
+        }
+        size={32}
+      />
+      <div className="min-w-0 flex-1">
+        <div
+          className={clsx(
+            "text-[14px] font-semibold truncate",
+            isPending ? "text-text-dim" : "text-text",
+          )}
+        >
+          {getUserDisplayName(userForName)}
+        </div>
+        <div className="text-[12px] text-text-dim truncate">{subtitle}</div>
+      </div>
+      {isOwner ? (
+        <span className="text-[11px] font-medium text-text-dim px-2 py-1 rounded-full bg-white/[0.06]">
+          {ownerLabel}
+        </span>
+      ) : isPending ? (
+        <span className="text-[11px] font-medium text-amber-300/90 px-2 py-1 rounded-full bg-amber-300/10 ring-1 ring-amber-300/20">
+          {pendingLabel}
+        </span>
+      ) : null}
+      <div className="flex items-center">
+        {isPending && onResend && resendLabel ? (
+          <button
+            type="button"
+            onClick={onResend}
+            disabled={isResending}
+            aria-label={resendLabel}
+            title={resendLabel}
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full text-text-dim hover:bg-primary/15 hover:text-primary transition cursor-pointer disabled:opacity-50"
+          >
+            <MailIcon size={14} />
+          </button>
+        ) : null}
+        {canRemove ? (
+          <button
+            type="button"
+            onClick={onRemove}
+            disabled={removing}
+            aria-label={removeLabel}
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full text-text-dim hover:bg-danger/15 hover:text-danger transition cursor-pointer disabled:opacity-50"
+          >
+            <TrashIcon size={14} />
+          </button>
+        ) : null}
+      </div>
+    </li>
   );
 }

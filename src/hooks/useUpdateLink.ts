@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateLink } from "@/lib/queryInvalidation";
 import type { LinkResponseDto, UpdateLinkDto } from "@/types/api";
 
 interface UpdateLinkVars {
@@ -12,11 +13,7 @@ export function useUpdateLink() {
   return useMutation<LinkResponseDto, unknown, UpdateLinkVars>({
     mutationFn: ({ id, data }) => api.links.update(id, data),
     onSuccess: (link) => {
-      queryClient.invalidateQueries({ queryKey: ["links"] });
-      queryClient.invalidateQueries({ queryKey: ["link", link.id] });
-      for (const c of link.collections ?? []) {
-        queryClient.invalidateQueries({ queryKey: ["collection", c.id] });
-      }
+      invalidateLink(queryClient, link);
     },
   });
 }

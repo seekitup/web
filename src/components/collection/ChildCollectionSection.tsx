@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import type {
@@ -7,6 +7,7 @@ import type {
 } from "@/types/api";
 import { ExpandedSubcollection } from "@/components/collection/ExpandedSubcollection";
 import { CompactSubcollection } from "@/components/collection/CompactSubcollection";
+import { fromLookupChild } from "@/lib/collectionDisplay";
 
 interface ChildCollectionSectionProps {
   childCollections: LookupChildCollectionDto[];
@@ -22,9 +23,13 @@ export function ChildCollectionSection({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
-  if (childCollections.length === 0) return null;
-
   const parentUsername = parentCollection.user.username;
+  const displayChildren = useMemo(
+    () => childCollections.map((c) => fromLookupChild(c, parentUsername)),
+    [childCollections, parentUsername],
+  );
+
+  if (childCollections.length === 0) return null;
 
   return (
     <div className="px-4 mb-4">
@@ -67,11 +72,10 @@ export function ChildCollectionSection({
             {view === "list" ? (
               /* Expanded view: each subcollection as a horizontal scroll section */
               <div className="pt-1">
-                {childCollections.map((child, i) => (
+                {displayChildren.map((child, i) => (
                   <ExpandedSubcollection
                     key={child.id}
                     collection={child}
-                    parentUsername={parentUsername}
                     index={i}
                     itemId={`collection-${child.id}`}
                   />
@@ -80,11 +84,10 @@ export function ChildCollectionSection({
             ) : (
               /* Grid view: compact 2x2 thumbnail cards */
               <div className="grid grid-cols-2 gap-3 pt-1 pb-2">
-                {childCollections.map((child, i) => (
+                {displayChildren.map((child, i) => (
                   <CompactSubcollection
                     key={child.id}
                     collection={child}
-                    parentUsername={parentUsername}
                     index={i}
                     itemId={`collection-${child.id}`}
                   />

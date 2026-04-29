@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 
 interface RemoveMemberVars {
   collectionId: number;
@@ -12,8 +13,7 @@ export function useRemoveMember() {
     mutationFn: ({ collectionId, memberId }) =>
       api.collections.removeMember(collectionId, memberId),
     onSuccess: (_, { collectionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      invalidateCollection(queryClient, collectionId);
     },
   });
 }

@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { BackButton } from "@/components/auth/BackButton";
-import { AccountPageHeader } from "@/components/account/SettingsSection";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export function AccountTwoStepPage() {
   const { t } = useTranslation();
@@ -12,13 +12,13 @@ export function AccountTwoStepPage() {
       <Helmet>
         <title>{t("accountTwoStepScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <AccountPageHeader
+      <PageHeader
+        leading={<BackButton to="/account" />}
         title={t("accountTwoStepScreen.title")}
         subtitle={t("accountTwoStepScreen.subtitle")}
       />
 
-      <div className="overflow-hidden rounded-2xl border border-neutral-800 bg-surface p-6">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-800 bg-surface p-6">
         <div className="flex items-start gap-4">
           <span
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary"

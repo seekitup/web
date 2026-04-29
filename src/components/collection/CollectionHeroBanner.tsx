@@ -48,6 +48,7 @@ export function CollectionHeroBanner({
 }: CollectionHeroBannerProps) {
   const { t } = useTranslation();
   const { user: owner, members } = collection;
+  const otherMembers = (members ?? []).filter((m) => m.user.id !== owner?.id);
 
   const canAdd = canAddContent(collection, currentUserId);
   const canShare = canShareCollection(collection, currentUserId);
@@ -192,16 +193,16 @@ export function CollectionHeroBanner({
             </div>
           ) : null}
 
-          {members && members.length > 0 ? (
+          {otherMembers.length > 1 ? (
             <div className="flex items-center gap-2 min-w-0">
               <AvatarStack
-                users={members.map((m) => ({
-                  id: m.id,
-                  username: m.username,
-                  firstName: m.firstName,
-                  lastName: m.lastName,
-                  image: m.image
-                    ? { id: m.image.id, url: m.image.url }
+                users={otherMembers.map((m) => ({
+                  id: m.user.id,
+                  username: m.user.username,
+                  firstName: m.user.firstName,
+                  lastName: m.user.lastName,
+                  image: m.user.image
+                    ? { id: m.user.image.id, url: m.user.image.url }
                     : null,
                 }))}
                 size={28}
@@ -209,7 +210,9 @@ export function CollectionHeroBanner({
                 ringClassName="ring-background"
               />
               <span className="text-[12px] text-text-dim">
-                {t("collectionHero.memberCount", { count: members.length })}
+                {t("collectionHero.memberCount", {
+                  count: otherMembers.length,
+                })}
               </span>
             </div>
           ) : null}

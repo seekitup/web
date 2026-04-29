@@ -55,7 +55,7 @@ export const MiniCollectionRow = memo<MiniCollectionRowProps>(
               className="text-[15px] font-semibold leading-snug text-text group-hover:text-primary-light transition-colors"
               clamp="line-clamp-1"
             />
-            {ownership !== "own" ? (
+            {ownership && ownership !== "own" ? (
               <OwnershipChip ownership={ownership} className="shrink-0" />
             ) : null}
           </div>

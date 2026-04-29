@@ -123,6 +123,25 @@ export interface LookupChildCollectionDto {
   previewLinks: LookupPreviewLinkDto[];
 }
 
+export interface LookupRoleDto {
+  id: number;
+  name: string;
+  displayName: string;
+}
+
+/**
+ * The viewer's own membership row, surfaced on the lookup so the client can
+ * render the pending-invitation banner without a second roundtrip.
+ * `acceptedAt` is null/undefined when the invitation is still pending.
+ */
+export interface LookupUserRoleDto {
+  id: number;
+  roleId: number;
+  role: LookupRoleDto;
+  acceptedAt?: string | null;
+  createdAt: string;
+}
+
 export interface CollectionLookupResponseDto {
   id: number;
   name: string;
@@ -133,6 +152,7 @@ export interface CollectionLookupResponseDto {
   user: LookupUserDto;
   members: LookupMemberDto[];
   childCollections: LookupChildCollectionDto[];
+  userRole?: LookupUserRoleDto;
 }
 
 // Collection invitation types
@@ -342,13 +362,20 @@ export interface SessionsQueryParams extends PaginationParams {
 // COLLECTIONS (authenticated)
 // ============================================================
 
+export interface RoleInfoDto {
+  id: number;
+  name: "owner" | "editor" | "member";
+  displayName: string;
+}
+
 export interface CollectionRoleUserDto {
   id: number;
-  username: string;
-  firstName?: string;
-  lastName?: string;
-  image?: FileResponseDto;
-  roleName: "owner" | "editor" | "member";
+  userId: number;
+  roleId: number;
+  role: RoleInfoDto;
+  user: UserResponseDto;
+  acceptedAt?: string | null;
+  createdAt: string;
 }
 
 export interface CollectionResponseDto {
@@ -369,11 +396,12 @@ export interface CollectionResponseDto {
   links: LinkResponseDto[];
   totalLinks: number;
   childCollections: unknown[];
+  isSaved: boolean;
   savedAt?: string;
 }
 
 export interface CollectionsQueryParams extends PaginationParams {
-  filter?: "all" | "my" | "invited" | "pending";
+  filter?: "all" | "my" | "invited" | "pending" | "saved";
   collectionId?: number | null | "null";
   name?: string;
   sortBy?: "createdAt" | "lastViewedAt";
@@ -444,6 +472,7 @@ export interface CollectionMemberResponseDto {
   user?: {
     id: number;
     username: string;
+    email?: string;
     firstName?: string;
     lastName?: string;
     image?: FileResponseDto | null;
@@ -456,6 +485,7 @@ export interface LinksQueryParams extends PaginationParams {
   collectionId?: number;
   visibility?: "public" | "private";
   sortBy?: "createdAt" | "lastViewedAt";
+  search?: string;
 }
 
 // ============================================================

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { PlusIcon } from "./nav/icons";
 import { NAV_ITEMS } from "./nav/items";
+import { useIsCollectionDetail } from "./nav/useIsCollectionDetail";
 
 interface MobileTabBarProps {
   onAddPress: () => void;
@@ -15,6 +16,7 @@ interface MobileTabBarProps {
  */
 export function MobileTabBar({ onAddPress }: MobileTabBarProps) {
   const { t } = useTranslation();
+  const isCollectionDetail = useIsCollectionDetail();
 
   // Mirror the mobile app: first two tabs left, FAB center, last two right.
   const left = NAV_ITEMS.slice(0, 2);
@@ -28,7 +30,12 @@ export function MobileTabBar({ onAddPress }: MobileTabBarProps) {
     >
       <div className="flex items-center px-1 py-2">
         {left.map((item) => (
-          <TabButton key={item.to} item={item} t={t} />
+          <TabButton
+            key={item.to}
+            item={item}
+            t={t}
+            forceActive={item.to === "/collections" && isCollectionDetail}
+          />
         ))}
 
         <div className="flex flex-1 items-center justify-center">
@@ -43,7 +50,12 @@ export function MobileTabBar({ onAddPress }: MobileTabBarProps) {
         </div>
 
         {right.map((item) => (
-          <TabButton key={item.to} item={item} t={t} />
+          <TabButton
+            key={item.to}
+            item={item}
+            t={t}
+            forceActive={item.to === "/collections" && isCollectionDetail}
+          />
         ))}
       </div>
     </nav>
@@ -53,37 +65,43 @@ export function MobileTabBar({ onAddPress }: MobileTabBarProps) {
 function TabButton({
   item,
   t,
+  forceActive,
 }: {
   item: (typeof NAV_ITEMS)[number];
   t: (k: string) => string;
+  forceActive: boolean;
 }) {
   const { Icon } = item;
   return (
     <NavLink
       to={item.to}
       end={item.end ?? false}
-      className={({ isActive }) =>
-        clsx(
+      className={({ isActive }) => {
+        const active = isActive || forceActive;
+        return clsx(
           "flex flex-1 flex-col items-center gap-1.5 rounded-lg px-1 py-1.5 transition-colors",
-          isActive ? "text-text" : "text-text-dim",
-        )
-      }
+          active ? "text-text" : "text-text-dim",
+        );
+      }}
     >
-      {({ isActive }) => (
-        <>
-          <Icon
-            width={20}
-            height={20}
-            className={clsx(
-              "transition-colors",
-              isActive ? "text-primary" : "text-text-dim",
-            )}
-          />
-          <span className="text-[10px] font-medium leading-none">
-            {t(item.labelKey)}
-          </span>
-        </>
-      )}
+      {({ isActive }) => {
+        const active = isActive || forceActive;
+        return (
+          <>
+            <Icon
+              width={20}
+              height={20}
+              className={clsx(
+                "transition-colors",
+                active ? "text-primary" : "text-text-dim",
+              )}
+            />
+            <span className="text-[10px] font-medium leading-none">
+              {t(item.labelKey)}
+            </span>
+          </>
+        );
+      }}
     </NavLink>
   );
 }

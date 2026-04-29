@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { BackButton } from "@/components/auth/BackButton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { api } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/apiError";
 import type { SessionResponseDto } from "@/types/api";
@@ -87,39 +88,35 @@ export function AccountSessionsPage() {
       <Helmet>
         <title>{t("accountSessionsScreen.title")} | Seekitup</title>
       </Helmet>
-      <BackButton to="/account" className="mb-4" />
-      <header className="mb-6 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-text">
-            {t("accountSessionsScreen.title")}
-          </h1>
-          <p className="mt-1 text-text-dim">
-            {t("accountSessionsScreen.subtitle")}
-          </p>
-        </div>
-        <button
-          onClick={() => sessionsQuery.refetch()}
-          className="text-sm text-text-dim hover:text-text transition-colors p-2 -m-2"
-          aria-label={t("accountSessionsScreen.refresh")}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="23 4 23 10 17 10" />
-            <polyline points="1 20 1 14 7 14" />
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-          </svg>
-        </button>
-      </header>
+      <PageHeader
+        leading={<BackButton to="/account" />}
+        title={t("accountSessionsScreen.title")}
+        subtitle={t("accountSessionsScreen.subtitle")}
+        actions={
+          <button
+            onClick={() => sessionsQuery.refetch()}
+            className="-m-2 p-2 text-sm text-text-dim transition-colors hover:text-text"
+            aria-label={t("accountSessionsScreen.refresh")}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+          </button>
+        }
+      />
 
       {sessionsQuery.isLoading ? (
-        <div className="flex justify-center py-10">
+        <div className="mt-6 flex justify-center py-10">
           <Spinner size={28} className="text-primary" />
         </div>
       ) : sessions.length === 0 ? (
-        <p className="text-center text-text-dim py-10">
+        <p className="mt-6 py-10 text-center text-text-dim">
           {t("accountSessionsScreen.empty")}
         </p>
       ) : (
-        <ul className="overflow-hidden rounded-2xl border border-neutral-800 bg-surface divide-y divide-neutral-800">
+        <ul className="mt-6 divide-y divide-neutral-800 overflow-hidden rounded-2xl border border-neutral-800 bg-surface">
           {sessions.map((s) => {
             const deviceLabel =
               s.deviceName ||

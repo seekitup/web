@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { invalidateCollection } from "@/lib/queryInvalidation";
 
 interface RemoveParentVars {
   collectionId: number;
@@ -12,9 +13,8 @@ export function useRemoveParent() {
     mutationFn: ({ collectionId, parentId }) =>
       api.collections.removeParent(collectionId, parentId),
     onSuccess: (_, { collectionId, parentId }) => {
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionId] });
-      queryClient.invalidateQueries({ queryKey: ["collection", parentId] });
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      invalidateCollection(queryClient, collectionId);
+      invalidateCollection(queryClient, parentId);
     },
   });
 }
