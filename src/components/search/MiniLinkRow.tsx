@@ -19,6 +19,7 @@ import {
   isYouTubeLink,
   extractYouTubeVideoId,
   getYouTubeThumbnailUrl,
+  isLinkedInProfile,
 } from "@/lib/linkUtils";
 import { getLinkOwnership } from "@/lib/ownership";
 
@@ -49,7 +50,10 @@ export const MiniLinkRow = memo<MiniLinkRowProps>(function MiniLinkRow({
   const isPending = isLinkPendingMedia(link);
 
   const { user } = useAuth();
-  const title = getLinkDisplayTitle(link);
+  const title =
+    isLinkedInProfile(link) && link.platformUserName?.trim()
+      ? link.platformUserName.trim()
+      : getLinkDisplayTitle(link);
   const primaryMedia = getLinkPrimaryMedia(link);
   const favicon = getLinkFavicon(link);
   const ownership = getLinkOwnership(link, user?.id);

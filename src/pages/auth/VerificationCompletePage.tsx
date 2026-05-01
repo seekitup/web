@@ -31,7 +31,7 @@ export function VerificationCompletePage() {
           </span>
         </motion.div>
 
-        <Button fullWidth onClick={() => navigate("/account", { replace: true })}>
+        <Button fullWidth onClick={() => navigate("/home", { replace: true })}>
           {t("verificationCompleteScreen.cta")}
         </Button>
       </AuthCard>

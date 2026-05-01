@@ -31,7 +31,7 @@ export function RegistrationSuccessPage() {
           </span>
         </motion.div>
 
-        <Button fullWidth onClick={() => navigate("/account", { replace: true })}>
+        <Button fullWidth onClick={() => navigate("/home", { replace: true })}>
           {t("registrationSuccessScreen.cta")}
         </Button>
       </AuthCard>

@@ -184,7 +184,13 @@ export const getLinkPrimaryMedia = (
   const primaryVideo = validFiles.find(
     (file) => file.purpose === "video" && hasVideoExtension(file.url),
   );
-  return primaryImage || primaryVideo;
+  const linkedInProfile = validFiles.find(
+    (file) => file.purpose === "profile_picture",
+  );
+  const linkedInCover = validFiles.find(
+    (file) => file.purpose === "cover_image",
+  );
+  return primaryImage || primaryVideo || linkedInProfile || linkedInCover;
 };
 
 /**
@@ -276,7 +282,8 @@ export const getVideoThumbnailUrl = (
 
 /**
  * Get the preview image URL from a LookupPreviewLinkDto.
- * Handles YouTube thumbnails and standard image/og_image files.
+ * Handles YouTube thumbnails and standard image/og_image files,
+ * falling back to LinkedIn profile_picture / cover_image when present.
  */
 export const getPreviewImageUrl = (
   link: LookupPreviewLinkDto,
@@ -285,9 +292,12 @@ export const getPreviewImageUrl = (
     ? extractYouTubeVideoId(link.url)
     : null;
   if (youtubeId) return getYouTubeThumbnailUrl(youtubeId);
-  const imageFile = link.files.find(
-    (f) => f.purpose === "image" || f.purpose === "og_image",
-  );
+  const imageFile =
+    link.files.find(
+      (f) => f.purpose === "image" || f.purpose === "og_image",
+    ) ||
+    link.files.find((f) => f.purpose === "profile_picture") ||
+    link.files.find((f) => f.purpose === "cover_image");
   return imageFile?.url;
 };
 
